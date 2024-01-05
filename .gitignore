@@ -1,0 +1,42 @@
+/out
+
+#VS
+.vs
+*.slo
+*.lo
+*.o
+*.obj
+
+# Qt specific
+*.moc
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
+*.qrc
+*.ui
+*.qmlc
+*.jsc
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Executables
+*.exe
+
+#CMake
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+cmake_install.cmake
+CMakeLists.txt.user
+*.cmake
+Makefile
+
+#Custom extension
+.timesheet
