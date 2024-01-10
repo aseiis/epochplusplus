@@ -66,7 +66,7 @@ QString Project::getPrettyTotalDuration() const
     int hours = seconds / 3600;
     int minutes = (seconds % 3600) / 60;
 
-    return QString("%1:%2").arg(hours).arg(minutes, 2, 10, QChar('0'));
+    return QString("%1h %2m").arg(hours).arg(minutes, 2, 10, QChar('0'));
 }
 
 bool Project::saveToFile(const QString& filePath)

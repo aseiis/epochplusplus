@@ -9,6 +9,8 @@ ProjectWidget::ProjectWidget(QWidget* parent, Project* projectPtr)
 
     ui->setupUi(this);
     connect(ui->playButton, &QToolButton::clicked, this, &ProjectWidget::togglePlay);
+
+    updateUI();
 }
 
 ProjectWidget::~ProjectWidget()
