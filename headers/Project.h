@@ -18,8 +18,6 @@ public:
     void start();
     void stop();
     void addSession(const Session& session);
-    //quint64 getCurrentSessionDuration() const;                  // Calculate duration of current session
-    //QString getPrettyCurrentSessionTotalDuration() const;       // Formatted mm:ss
     QDateTime getCurrentSessionStartTime();
     quint64 getTotalDuration() const;                           // Calculate total duration of all sessions
     QString getPrettyTotalDuration() const;                     // Formatted hh:mm:ss
