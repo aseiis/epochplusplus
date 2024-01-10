@@ -1,19 +1,72 @@
 #include "../headers/ProjectWidget.h"
 
-ProjectWidget::ProjectWidget(QWidget* parent)
-    : QWidget(parent)
-    , ui(new Ui::ProjectWidgetClass())
+ProjectWidget::ProjectWidget(QWidget* parent, Project* projectPtr)
+    : QWidget(parent), ui(new Ui::ProjectWidgetClass()), project(projectPtr)
 {
-    ui->setupUi(this);
-}
+    currentSessionElapsedSecs = 0;
+    currentSessionTimer = new QTimer();
+    connect(currentSessionTimer, &QTimer::timeout, this, [this] { ProjectWidget::updateCurrentSession(1); });
 
-void ProjectWidget::UpdateUI(Project* projectDataPtr)
-{
-    ui->projectNameLabel->setText(projectDataPtr->getProjectName());
-    ui->projectTotalDurationLabel->setText(projectDataPtr->getPrettyTotalDuration());
+    ui->setupUi(this);
+    connect(ui->playButton, &QToolButton::clicked, this, &ProjectWidget::togglePlay);
 }
 
 ProjectWidget::~ProjectWidget()
 {
     delete ui;
+    delete currentSessionTimer;
+}
+
+void ProjectWidget::updateUI()
+{
+    ui->projectNameLabel->setText(project->getProjectName());
+    ui->projectTotalDurationLabel->setText(project->getPrettyTotalDuration());
+}
+
+void ProjectWidget::startCurrentSessionTimer()
+{
+    currentSessionElapsedSecs = 0;
+    currentSessionTimer->start(1000);
+}
+
+void ProjectWidget::endCurrentSessionTimer()
+{
+    currentSessionElapsedSecs = 0;
+    currentSessionTimer->stop();
+    ui->currentSessionDurationLabel->setText(getPrettyCurrentSessionDuration());
+}
+
+QString ProjectWidget::getPrettyCurrentSessionDuration()
+{
+    quint64 sessionDuration = currentSessionElapsedSecs;
+
+    int minutes = static_cast<int>((sessionDuration / 60) % 60);
+    int seconds = static_cast<int>(sessionDuration % 60);
+
+    // Formatting the output as mm:ss
+    return QString("%1:%2s")
+        .arg(minutes, 2, 10, QChar('0'))
+        .arg(seconds, 2, 10, QChar('0'));
+}
+
+void ProjectWidget::updateCurrentSession(int elapsedTime)
+{
+    currentSessionElapsedSecs += elapsedTime;
+    ui->currentSessionDurationLabel->setText(getPrettyCurrentSessionDuration());
+}
+
+void ProjectWidget::togglePlay()
+{
+    if (!project->isRunning()) {
+        project->start();
+        startCurrentSessionTimer();
+        ui->playButton->setText("#");
+    }
+    else {
+        project->stop();
+        endCurrentSessionTimer();
+        ui->playButton->setText(">");
+    }
+
+    updateUI();
 }

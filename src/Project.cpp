@@ -1,8 +1,10 @@
 #include "../headers/Project.h"
 
-Project::Project(const QString& name) : projectName(name)
+Project::Project(int ID, const QString& name) : projectName(name), ID(ID)
 {
-
+    currentSession = nullptr;
+    currentSessionID = 0;
+    sessions = QList<Session>();
 }
 
 Project::~Project()
@@ -10,9 +12,62 @@ Project::~Project()
     // Save file on destruction?
 }
 
+void Project::start()
+{
+    if (currentSession != nullptr) {
+        qDebug() << "ERROR: Tried to start a new session but project already have a running session registered. Aborting.";
+        return;
+    }
+
+    currentSession = new Session(currentSessionID);
+    currentSession->start();
+}
+
+void Project::stop()
+{
+    if (currentSession == nullptr) {
+        qDebug() << "ERROR: Tried to stop current session but project doesn't register any running session. Aborting.";
+        return;
+    }
+
+    currentSession->end();
+    addSession(*currentSession);
+    currentSession = nullptr;
+    currentSessionID++;
+}
+
+bool Project::isRunning()
+{
+    return currentSession != nullptr;
+}
+
 void Project::addSession(const Session& session)
 {
     sessions.append(session);
+}
+
+//quint64 Project::getCurrentSessionDuration() const
+//{
+//    quint64 sessionStart = currentSession->getStartDateTime().currentSecsSinceEpoch();
+//    return sessionStart - QDateTime::currentDateTime().currentSecsSinceEpoch();
+//}
+//
+//QString Project::getPrettyCurrentSessionTotalDuration() const
+//{
+//    quint64 sessionDuration = getCurrentSessionDuration();
+//
+//    int minutes = static_cast<int>((sessionDuration / 60) % 60);
+//    int seconds = static_cast<int>(sessionDuration % 60);
+//
+//    // Formatting the output as mm:ss
+//    return QString("%1:%2")
+//        .arg(minutes, 2, 10, QChar('0'))
+//        .arg(seconds, 2, 10, QChar('0'));
+//}
+
+QDateTime Project::getCurrentSessionStartTime()
+{
+    return currentSession->getStartDateTime();
 }
 
 quint64 Project::getTotalDuration() const

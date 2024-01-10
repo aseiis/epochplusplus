@@ -7,12 +7,10 @@ TimeTrackingApp::TimeTrackingApp(QWidget *parent)
     ui->setupUi(this);
 
     //Test
-    Project projectModel = Project("Test Project");
-    Project* projectModelPtr = new Project("Test project");
-    ProjectWidget* projectViewPtr = new ProjectWidget(this);
-    ProjectController projectController = ProjectController(projectModelPtr, projectViewPtr);
+    Project* project = new Project(0, "Test project");
+    ProjectWidget* projectVM = new ProjectWidget(this, project);
 
-    ui->ProjectsLayout->addWidget(projectViewPtr);
+    ui->ProjectsLayout->addWidget(projectVM);
 }
 
 TimeTrackingApp::~TimeTrackingApp()

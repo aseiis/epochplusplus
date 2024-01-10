@@ -4,7 +4,6 @@
 
 #include "../headers/Project.h"
 #include "../headers/ProjectWidget.h"
-#include "../headers/ProjectController.h"
 
 #include "../ui/ui_TimeTrackingApp.h"
 

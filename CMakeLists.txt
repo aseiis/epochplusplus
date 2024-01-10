@@ -23,7 +23,6 @@ set(PROJECT_SOURCES
     headers/TimeTrackingApp.h
     headers/ProjectWidget.h
     headers/Project.h
-    headers/ProjectController.h
     headers/Session.h
     headers/utils.h
     #SRC
@@ -31,7 +30,6 @@ set(PROJECT_SOURCES
     src/TimeTrackingApp.cpp
     src/ProjectWidget.cpp
     src/Project.cpp
-    src/ProjectController.cpp
     src/Session.cpp
 )
 
