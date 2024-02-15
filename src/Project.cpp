@@ -34,6 +34,8 @@ void Project::stop()
     addSession(*currentSession);
     currentSession = nullptr;
     currentSessionID++;
+
+    saveToFile(QDir::currentPath() + "/" + "saves/" + projectName);
 }
 
 bool Project::isRunning()
@@ -75,7 +77,10 @@ bool Project::saveToFile(const QString& filePath)
     qDebug() << "Saving to file " << finalFilePath;
     QFile file(finalFilePath);
     if (!file.open(QIODevice::WriteOnly))
+    {
+        qDebug() << "ERROR: Couldn't save file at " << finalFilePath << ". Error: " << file.errorString();
         return false;
+    }
 
     QDataStream out(&file);
     out.setVersion(QDataStream::Qt_DefaultCompiledVersion);

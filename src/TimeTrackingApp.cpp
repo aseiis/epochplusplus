@@ -4,6 +4,7 @@ TimeTrackingApp::TimeTrackingApp(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::TimeTrackingAppClass())
 {
+    InitSavesDir();
     ui->setupUi(this);
 
     //Test
@@ -16,4 +17,18 @@ TimeTrackingApp::TimeTrackingApp(QWidget *parent)
 TimeTrackingApp::~TimeTrackingApp()
 {
     delete ui;
+}
+
+void TimeTrackingApp::InitSavesDir()
+{
+    QString savesDirPath = QDir::currentPath() + "/" + "saves/";
+    QFile file(savesDirPath);
+    if (!file.open(QIODevice::WriteOnly)) {
+        QDir dir;
+        if (!dir.mkpath(savesDirPath))
+        {
+            qDebug() << "ERROR: Couldn't create directory at " << savesDirPath;
+            return;
+        }
+    }
 }

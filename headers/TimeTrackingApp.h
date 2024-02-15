@@ -22,4 +22,5 @@ public:
 
 private:
     Ui::TimeTrackingAppClass *ui;
+    void InitSavesDir();
 };

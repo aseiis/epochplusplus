@@ -4,6 +4,7 @@
 #include <QList>
 #include <QTimer>
 #include <QFile>
+#include <QDir>
 #include <QDataStream>
 #include <QDebug>
 #include "Session.h"
