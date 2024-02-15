@@ -8,6 +8,8 @@ ProjectWidget::ProjectWidget(QWidget* parent, Project* projectPtr)
     connect(currentSessionTimer, &QTimer::timeout, this, [this] { ProjectWidget::updateCurrentSession(1); });
 
     ui->setupUi(this);
+    setStyleSheet("ProjectWidget { border: 1px dotted rgba(180, 20, 170, 250); } ");
+    setAttribute(Qt::WA_StyledBackground, true);
     connect(ui->playButton, &QToolButton::clicked, this, &ProjectWidget::togglePlay);
 
     updateUI();
