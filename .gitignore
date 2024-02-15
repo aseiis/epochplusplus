@@ -68,7 +68,6 @@ CMakeFiles/
 CMakeScripts/
 cmake_install.cmake
 CMakeLists.txt.user
-*.cmake
 Makefile
 
 #Custom extension
