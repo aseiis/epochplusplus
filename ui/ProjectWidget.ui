@@ -36,7 +36,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>641</width>
+     <width>644</width>
      <height>61</height>
     </rect>
    </property>
@@ -105,8 +105,23 @@
       </item>
       <item>
        <widget class="QLabel" name="currentSessionStaticLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="text">
-         <string>Current Session</string>
+         <string>Current Session:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>
@@ -119,22 +134,6 @@
       </item>
       <item>
        <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_3">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -196,9 +195,9 @@
        </spacer>
       </item>
       <item>
-       <widget class="QToolButton" name="moreButton">
+       <widget class="QToolButton" name="editButton">
         <property name="text">
-         <string>More ...</string>
+         <string>Edit...</string>
         </property>
        </widget>
       </item>
