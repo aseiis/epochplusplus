@@ -4,53 +4,56 @@ TimeTrackingApp::TimeTrackingApp(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::TimeTrackingAppClass())
 {
-    InitSavesDir();
+    initSavesDir();
+
     ui->setupUi(this);
 
     //Test
-    Project* project = new Project(0, "Test project");
-    ProjectWidget* projectVM = new ProjectWidget(this, project);
+    //Run below to create projects than run them for some time, stop them (triggering a save) and recomment: it should then load with loadAllProjects();
+    /*
+    Project* project = new Project("Test project");
+    projects.push_back(project);
+    Project* project2 = new Project("Very long length line height length project 2");
+    projects.push_back(project2);
+    Project* project3 = new Project("~~~~~~~~~~~~~~~~~~");
+    projects.push_back(project3);
+    Project* project4 = new Project("Test project 323");
+    projects.push_back(project4);
+    Project* project5 = new Project("Test project 552");
+    projects.push_back(project5);
+    Project* project6 = new Project("Test project 6");
+    projects.push_back(project6);
+    Project* project7 = new Project("Test project 7");
+    projects.push_back(project7);
+    */
 
-    Project* project2 = new Project(0, "Very long length line height length project 2");
-    ProjectWidget* projectVM2 = new ProjectWidget(this, project2);
+    loadAllProjects();
 
-    Project* project3 = new Project(0, "~~~~~~~~~~~~~~~~~~");
-    ProjectWidget* projectVM3 = new ProjectWidget(this, project3);
-
-    Project* project4 = new Project(0, "Test project 323");
-    ProjectWidget* projectVM4 = new ProjectWidget(this, project4);
-
-    Project* project5 = new Project(0, "Test project 552");
-    ProjectWidget* projectVM5 = new ProjectWidget(this, project5);
-
-    
-    Project* project6 = new Project(0, "Test project 6");
-    ProjectWidget* projectVM6 = new ProjectWidget(this, project6);
-
-    Project* project7 = new Project(0, "Test project 7");
-    ProjectWidget* projectVM7 = new ProjectWidget(this, project7);
-    
-
-    QVBoxLayout* scrollAreaVBoxLayout = new QVBoxLayout(ui->scrollAreaWidgetContents);
+    scrollAreaVBoxLayout = new QVBoxLayout(ui->scrollAreaWidgetContents);
     ui->scrollAreaWidgetContents->setLayout(scrollAreaVBoxLayout);
 
-    scrollAreaVBoxLayout->addWidget(projectVM);
-    scrollAreaVBoxLayout->addWidget(projectVM2);
-    scrollAreaVBoxLayout->addWidget(projectVM3);
-    scrollAreaVBoxLayout->addWidget(projectVM4);
-    scrollAreaVBoxLayout->addWidget(projectVM5);
-    scrollAreaVBoxLayout->addWidget(projectVM6);
-    scrollAreaVBoxLayout->addWidget(projectVM7);
+    createProjectWidgets();
 }
 
 TimeTrackingApp::~TimeTrackingApp()
 {
+    for (ProjectWidget* projectVm : projectsVm)
+    {
+        delete projectVm;
+    }
+
+    for (Project* project : projects)
+    {
+        delete project;
+    }
+
+    delete scrollAreaVBoxLayout;
     delete ui;
 }
 
-void TimeTrackingApp::InitSavesDir()
+void TimeTrackingApp::initSavesDir()
 {
-    QString savesDirPath = QDir::currentPath() + "/" + "saves/";
+    QString savesDirPath = QDir::currentPath() + DEF_SAVE_LOCATION;
     QFile file(savesDirPath);
     if (!file.open(QIODevice::WriteOnly)) {
         QDir dir;
@@ -60,4 +63,50 @@ void TimeTrackingApp::InitSavesDir()
             return;
         }
     }
+}
+
+void TimeTrackingApp::loadAllProjects()
+{
+    QDir savesDir = QDir::currentPath() + DEF_SAVE_LOCATION;
+    if (!savesDir.exists()) {
+        qWarning() << "Saves directory does not exist (path: " << savesDir << ")";
+        return;
+    }
+
+    QString wildcardExt = "*." + QString(DEF_BIN_FILE_EXTENSION);
+    savesDir.setNameFilters(QStringList() << wildcardExt);
+    savesDir.setFilter(QDir::Files | QDir::NoDotAndDotDot);
+
+    QFileInfoList fileList = savesDir.entryInfoList();
+    for(const QFileInfo & fileInfo : fileList) {
+        QString filePath = fileInfo.absoluteFilePath();
+        Project* loadedProject = new Project("Unnamed Loaded Project");
+        loadedProject->loadFromFile(filePath);
+        projects.push_back(loadedProject);
+    }
+}
+
+void TimeTrackingApp::createProjectWidgets()
+{
+    for (Project* p : projects)
+    {
+        ProjectWidget* newProjectVm = new ProjectWidget(this, p);
+        projectsVm.push_back(newProjectVm);
+        scrollAreaVBoxLayout->addWidget(newProjectVm);
+    }
+}
+
+void TimeTrackingApp::removeProjectWidgets()
+{
+    QLayoutItem* child;
+    while ((child = scrollAreaVBoxLayout->takeAt(0)) != nullptr) {
+
+        delete child->widget(); // delete the widget
+        delete child;           // delete the layout item
+    }
+}
+
+void TimeTrackingApp::refreshProjectsDisplay()
+{
+    removeProjectWidgets();
 }

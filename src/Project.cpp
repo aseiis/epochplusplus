@@ -1,10 +1,13 @@
 #include "../headers/Project.h"
 
-Project::Project(int ID, const QString& name) : projectName(name), ID(ID)
+int Project::currentProjectCount = 0;
+
+Project::Project(const QString& name) : projectName(name), ID(currentProjectCount)
 {
     currentSession = nullptr;
     currentSessionID = 0;
     sessions = QList<Session>();
+    currentProjectCount++;
 }
 
 Project::~Project()
@@ -35,7 +38,7 @@ void Project::stop()
     currentSession = nullptr;
     currentSessionID++;
 
-    saveToFile(QDir::currentPath() + "/" + "saves/" + projectName);
+    saveToFile(QDir::currentPath() + DEF_SAVE_LOCATION + projectName);
 }
 
 bool Project::isRunning()
@@ -127,6 +130,12 @@ bool Project::loadFromFile(const QString& filePath)
     }
 
     return true;
+}
+
+bool Project::loadFromSave(const QString& projectName)
+{
+    QString path = QDir::currentPath() + DEF_SAVE_LOCATION + projectName;
+    return loadFromFile(path);
 }
 
 QString& Project::getProjectName()

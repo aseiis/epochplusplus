@@ -21,6 +21,18 @@ public:
     ~TimeTrackingApp();
 
 private:
+    void initSavesDir();
+    void loadAllProjects();
+    void createProjectWidgets();
+    void removeProjectWidgets();
+    void refreshProjectsDisplay();
+
+private:
     Ui::TimeTrackingAppClass *ui;
-    void InitSavesDir();
+    QVBoxLayout* scrollAreaVBoxLayout;
+
+    std::vector<Project*> projects;
+    std::vector<ProjectWidget*> projectsVm;
+
+
 };
