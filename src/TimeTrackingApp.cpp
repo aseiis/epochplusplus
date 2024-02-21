@@ -8,6 +8,8 @@ TimeTrackingApp::TimeTrackingApp(QWidget *parent)
 
     ui->setupUi(this);
 
+    connect(ui->newProjectPushButton, &QPushButton::pressed, this, [this] { askNewProject(); });
+
     //Test
     //Run below to create projects than run them for some time, stop them (triggering a save) and recomment: it should then load with loadAllProjects();
     /*
@@ -27,12 +29,14 @@ TimeTrackingApp::TimeTrackingApp(QWidget *parent)
     projects.push_back(project7);
     */
 
-    loadAllProjects();
 
     scrollAreaVBoxLayout = new QVBoxLayout(ui->scrollAreaWidgetContents);
+    scrollAreaVBoxLayout->setSpacing(10);
     ui->scrollAreaWidgetContents->setLayout(scrollAreaVBoxLayout);
 
-    createProjectWidgets();
+    loadAndDisplayProjects();
+    
+    scrollAreaVBoxLayout->addSpacerItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
 }
 
 TimeTrackingApp::~TimeTrackingApp()
@@ -42,7 +46,7 @@ TimeTrackingApp::~TimeTrackingApp()
         delete projectVm;
     }
 
-    for (Project* project : projects)
+    for (ProjectData* project : projects)
     {
         delete project;
     }
@@ -65,7 +69,7 @@ void TimeTrackingApp::initSavesDir()
     }
 }
 
-void TimeTrackingApp::loadAllProjects()
+void TimeTrackingApp::loadAndDisplayProjects()
 {
     QDir savesDir = QDir::currentPath() + DEF_SAVE_LOCATION;
     if (!savesDir.exists()) {
@@ -80,20 +84,44 @@ void TimeTrackingApp::loadAllProjects()
     QFileInfoList fileList = savesDir.entryInfoList();
     for(const QFileInfo & fileInfo : fileList) {
         QString filePath = fileInfo.absoluteFilePath();
-        Project* loadedProject = new Project("Unnamed Loaded Project");
+        ProjectData* loadedProject = new ProjectData("Unnamed Loaded Project");
         loadedProject->loadFromFile(filePath);
         projects.push_back(loadedProject);
     }
+
+    for (ProjectData* p : projects)
+    {
+        newProjectWidget(p);
+    }
 }
 
-void TimeTrackingApp::createProjectWidgets()
+void TimeTrackingApp::askNewProject()
 {
-    for (Project* p : projects)
-    {
-        ProjectWidget* newProjectVm = new ProjectWidget(this, p);
-        projectsVm.push_back(newProjectVm);
-        scrollAreaVBoxLayout->addWidget(newProjectVm);
+    bool ok;
+    QString text = QInputDialog::getText(this, tr("New Project"),
+        tr("Project Name:"), QLineEdit::Normal,
+        "Unnamed Project", &ok);
+
+    if (ok && !text.isEmpty()) {
+        createProject(text);
     }
+    else {
+        std::cout << "ERROR: Couldn't get new project name. Aborting new project creation" << std::endl;
+    }
+}
+
+void TimeTrackingApp::createProject(QString& newProjectName)
+{
+    ProjectData* newProject = new ProjectData(newProjectName);
+    projects.push_back(newProject);
+    newProjectWidget(newProject);
+}
+
+void TimeTrackingApp::newProjectWidget(ProjectData* project)
+{
+    ProjectWidget* newProjectVm = new ProjectWidget(this, project);
+    projectsVm.push_back(newProjectVm);
+    scrollAreaVBoxLayout->insertWidget(scrollAreaVBoxLayout->count() - 1, newProjectVm);
 }
 
 void TimeTrackingApp::removeProjectWidgets()

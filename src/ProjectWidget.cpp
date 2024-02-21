@@ -1,6 +1,6 @@
 #include "../headers/ProjectWidget.h"
 
-ProjectWidget::ProjectWidget(QWidget* parent, Project* projectPtr)
+ProjectWidget::ProjectWidget(QWidget* parent, ProjectData* projectPtr)
     : QWidget(parent), ui(new Ui::ProjectWidgetClass()), project(projectPtr)
 {
     currentSessionElapsedSecs = 0;

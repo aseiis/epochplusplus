@@ -2,7 +2,7 @@
 
 #include <QtWidgets/QWidget>
 
-#include "../headers/Project.h"
+#include "../headers/ProjectData.h"
 
 #include "../ui/ui_ProjectWidget.h"
 
@@ -15,7 +15,7 @@ class ProjectWidget : public QWidget
 	Q_OBJECT
 
 public:
-	ProjectWidget(QWidget* parent = nullptr, Project* projectPtr = nullptr);
+	ProjectWidget(QWidget* parent = nullptr, ProjectData* projectPtr = nullptr);
 	~ProjectWidget();
 	void updateUI();
 	void startCurrentSessionTimer();
@@ -28,7 +28,7 @@ public slots:
 
 private:
 	Ui::ProjectWidgetClass* ui;
-	Project* project;
+	ProjectData* project;
 	quint64 currentSessionElapsedSecs;
 	QTimer* currentSessionTimer;
 

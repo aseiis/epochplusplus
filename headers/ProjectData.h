@@ -10,11 +10,11 @@
 #include "Session.h"
 #include "utils.h"
 
-class Project
+class ProjectData
 {
 public:
-    Project(const QString& name);
-    ~Project();
+    ProjectData(const QString& name);
+    ~ProjectData();
 
     void start();
     void stop();

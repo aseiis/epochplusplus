@@ -22,14 +22,14 @@ set(PROJECT_SOURCES
     #HEADERS
     headers/TimeTrackingApp.h
     headers/ProjectWidget.h
-    headers/Project.h
+    headers/ProjectData.h
     headers/Session.h
     headers/utils.h
     #SRC
     src/main.cpp
     src/TimeTrackingApp.cpp
     src/ProjectWidget.cpp
-    src/Project.cpp
+    src/ProjectData.cpp
     src/Session.cpp
 )
 

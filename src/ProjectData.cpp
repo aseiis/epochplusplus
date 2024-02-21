@@ -1,8 +1,8 @@
-#include "../headers/Project.h"
+#include "../headers/ProjectData.h"
 
-int Project::currentProjectCount = 0;
+int ProjectData::currentProjectCount = 0;
 
-Project::Project(const QString& name) : projectName(name), ID(currentProjectCount)
+ProjectData::ProjectData(const QString& name) : projectName(name), ID(currentProjectCount)
 {
     currentSession = nullptr;
     currentSessionID = 0;
@@ -10,12 +10,12 @@ Project::Project(const QString& name) : projectName(name), ID(currentProjectCoun
     currentProjectCount++;
 }
 
-Project::~Project()
+ProjectData::~ProjectData()
 {
     // Save file on destruction?
 }
 
-void Project::start()
+void ProjectData::start()
 {
     if (currentSession != nullptr) {
         qDebug() << "ERROR: Tried to start a new session but project already have a running session registered. Aborting.";
@@ -26,7 +26,7 @@ void Project::start()
     currentSession->start();
 }
 
-void Project::stop()
+void ProjectData::stop()
 {
     if (currentSession == nullptr) {
         qDebug() << "ERROR: Tried to stop current session but project doesn't register any running session. Aborting.";
@@ -41,22 +41,22 @@ void Project::stop()
     saveToFile(QDir::currentPath() + DEF_SAVE_LOCATION + projectName);
 }
 
-bool Project::isRunning()
+bool ProjectData::isRunning()
 {
     return currentSession != nullptr;
 }
 
-void Project::addSession(const Session& session)
+void ProjectData::addSession(const Session& session)
 {
     sessions.append(session);
 }
 
-QDateTime Project::getCurrentSessionStartTime()
+QDateTime ProjectData::getCurrentSessionStartTime()
 {
     return currentSession->getStartDateTime();
 }
 
-quint64 Project::getTotalDuration() const
+quint64 ProjectData::getTotalDuration() const
 {
     quint64 total = 0;
     for (const Session& session : sessions) {
@@ -65,7 +65,7 @@ quint64 Project::getTotalDuration() const
     return total;
 }
 
-QString Project::getPrettyTotalDuration() const
+QString ProjectData::getPrettyTotalDuration() const
 {
     quint64 seconds = getTotalDuration();
     int hours = seconds / 3600;
@@ -74,7 +74,7 @@ QString Project::getPrettyTotalDuration() const
     return QString("%1h %2m").arg(hours).arg(minutes, 2, 10, QChar('0'));
 }
 
-bool Project::saveToFile(const QString& filePath)
+bool ProjectData::saveToFile(const QString& filePath)
 {
     QString finalFilePath = filePath + "." + DEF_BIN_FILE_EXTENSION;
     qDebug() << "Saving to file " << finalFilePath;
@@ -102,7 +102,7 @@ bool Project::saveToFile(const QString& filePath)
     return true;
 }
 
-bool Project::loadFromFile(const QString& filePath)
+bool ProjectData::loadFromFile(const QString& filePath)
 {
     qDebug() << "Loading from file " << filePath;
     QFile file(filePath);
@@ -132,13 +132,13 @@ bool Project::loadFromFile(const QString& filePath)
     return true;
 }
 
-bool Project::loadFromSave(const QString& projectName)
+bool ProjectData::loadFromSave(const QString& projectName)
 {
     QString path = QDir::currentPath() + DEF_SAVE_LOCATION + projectName;
     return loadFromFile(path);
 }
 
-QString& Project::getProjectName()
+QString& ProjectData::getProjectName()
 {
     return projectName;
 }

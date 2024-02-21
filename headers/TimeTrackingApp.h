@@ -1,8 +1,11 @@
 #pragma once
 
-#include <QtWidgets/QMainWindow>
+#include <iostream>
 
-#include "../headers/Project.h"
+#include <QtWidgets/QMainWindow>
+#include <QInputDialog>
+
+#include "../headers/ProjectData.h"
 #include "../headers/ProjectWidget.h"
 
 #include "../ui/ui_TimeTrackingApp.h"
@@ -22,8 +25,10 @@ public:
 
 private:
     void initSavesDir();
-    void loadAllProjects();
-    void createProjectWidgets();
+    void loadAndDisplayProjects();
+    void askNewProject();
+    void createProject(QString& newProjectName = QString("Unnammed Project"));
+    void newProjectWidget(ProjectData* project);
     void removeProjectWidgets();
     void refreshProjectsDisplay();
 
@@ -31,7 +36,7 @@ private:
     Ui::TimeTrackingAppClass *ui;
     QVBoxLayout* scrollAreaVBoxLayout;
 
-    std::vector<Project*> projects;
+    std::vector<ProjectData*> projects;
     std::vector<ProjectWidget*> projectsVm;
 
 
