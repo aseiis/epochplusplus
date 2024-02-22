@@ -8,6 +8,8 @@ TimeTrackingApp::TimeTrackingApp(QWidget *parent)
 
     ui->setupUi(this);
 
+    this->setWindowTitle(APP_NAME);
+
     connect(ui->newProjectPushButton, &QPushButton::pressed, this, [this] { askNewProject(); });
 
     //Test
@@ -66,7 +68,7 @@ void TimeTrackingApp::initSavesDir()
         QDir dir;
         if (!dir.mkpath(savesDirPath))
         {
-            qDebug() << "ERROR: Couldn't create directory at " << savesDirPath;
+            qDebug() << "ERROR: Couldn't create directory at " << savesDirPath << endl;
             return;
         }
     }
@@ -76,7 +78,7 @@ void TimeTrackingApp::loadAndDisplayProjects()
 {
     QDir savesDir = QDir::currentPath() + DEF_SAVE_LOCATION;
     if (!savesDir.exists()) {
-        qWarning() << "Saves directory does not exist (path: " << savesDir << ")";
+        qWarning() << "Saves directory does not exist (path: " << savesDir << ")" << endl;
         return;
     }
 
@@ -106,10 +108,16 @@ void TimeTrackingApp::askNewProject()
         "Unnamed Project", &ok);
 
     if (ok && !text.isEmpty()) {
+        if (!isProjectNameUnique(text)) {
+            qWarning() << "ERROR: Project name already used. Aborting new project creation" << endl;
+            throwNewMessageBox("Project name already used. Please provide a new, unique name.", QMessageBox::Ok)->exec();
+            return;
+        }
+        
         createProject(text);
     }
     else {
-        std::cout << "ERROR: Couldn't get new project name. Aborting new project creation" << std::endl;
+        qWarning() << "ERROR: Couldn't get new project name. Aborting new project creation" << endl;
     }
 }
 
@@ -118,6 +126,18 @@ void TimeTrackingApp::createProject(QString& newProjectName)
     ProjectData* newProject = new ProjectData(newProjectName);
     projects.push_back(newProject);
     newProjectWidget(newProject);
+}
+
+bool TimeTrackingApp::isProjectNameUnique(QString& testProjectName)
+{
+    for (ProjectData* p : projects)
+    {
+        if (p->getProjectName() == testProjectName) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 void TimeTrackingApp::newProjectWidget(ProjectData* project)
@@ -140,4 +160,24 @@ void TimeTrackingApp::removeProjectWidgets()
 void TimeTrackingApp::refreshProjectsDisplay()
 {
     removeProjectWidgets();
+}
+
+QMessageBox* TimeTrackingApp::throwNewMessageBox(QString text, QFlags<QMessageBox::StandardButton> buttons, QMessageBox::StandardButton defaultButton, QString windowTitle)
+{
+    QMessageBox* msgBox = new QMessageBox(this->centralWidget());
+
+    if (windowTitle == "")
+        msgBox->setWindowTitle(APP_NAME);
+    else
+        msgBox->setWindowTitle(windowTitle);
+
+    msgBox->setText(text);
+    msgBox->setStandardButtons(buttons);
+
+    if (defaultButton != QMessageBox::NoButton)
+        msgBox->setDefaultButton(defaultButton);
+
+    //msgBox->setIconPixmap(QPixmap(":/icon.png"));
+
+    return msgBox;
 }
