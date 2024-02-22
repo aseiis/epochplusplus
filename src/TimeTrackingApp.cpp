@@ -37,6 +37,9 @@ TimeTrackingApp::TimeTrackingApp(QWidget *parent)
     loadAndDisplayProjects();
     
     scrollAreaVBoxLayout->addSpacerItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
+    
+    this->setFixedSize(size());
+    this->statusBar()->setSizeGripEnabled(false);
 }
 
 TimeTrackingApp::~TimeTrackingApp()
