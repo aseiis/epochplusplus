@@ -32,9 +32,11 @@ TimeTrackingApp::TimeTrackingApp(QWidget *parent)
     */
 
 
-    scrollAreaVBoxLayout = new QVBoxLayout(ui->scrollAreaWidgetContents);
+    // UI Layout
+
+    scrollAreaVBoxLayout = new QVBoxLayout(ui->projectsScrollAreaWidgetContents);
     scrollAreaVBoxLayout->setSpacing(10);
-    ui->scrollAreaWidgetContents->setLayout(scrollAreaVBoxLayout);
+    ui->projectsScrollAreaWidgetContents->setLayout(scrollAreaVBoxLayout);
 
     loadAndDisplayProjects();
     
@@ -42,6 +44,8 @@ TimeTrackingApp::TimeTrackingApp(QWidget *parent)
     
     this->setFixedSize(size());
     this->statusBar()->setSizeGripEnabled(false);
+
+    configureStyleSheet();
 }
 
 TimeTrackingApp::~TimeTrackingApp()
@@ -180,4 +184,19 @@ QMessageBox* TimeTrackingApp::throwNewMessageBox(QString text, QFlags<QMessageBo
     //msgBox->setIconPixmap(QPixmap(":/icon.png"));
 
     return msgBox;
+}
+
+void TimeTrackingApp::configureStyleSheet()
+{
+    QFile styleSheetFile(":/qss/default-style.qss");
+    if (!styleSheetFile.open(QFile::ReadOnly))
+    {
+        qDebug() << "Couldn't open QSS file" << endl;
+        return;
+    }
+
+    QString mainStyleSheet = QLatin1String(styleSheetFile.readAll());
+    styleSheetFile.close();
+
+    setStyleSheet(mainStyleSheet);
 }

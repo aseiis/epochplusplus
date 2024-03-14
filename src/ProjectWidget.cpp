@@ -7,9 +7,15 @@ ProjectWidget::ProjectWidget(QWidget* parent, ProjectData* projectPtr)
     currentSessionTimer = new QTimer();
     connect(currentSessionTimer, &QTimer::timeout, this, [this] { ProjectWidget::updateCurrentSession(1); });
 
-    ui->setupUi(this);
-    setStyleSheet("ProjectWidget { border: 1px dotted rgba(180, 20, 170, 250); } ");
     setAttribute(Qt::WA_StyledBackground, true);
+
+    ui->setupUi(this);
+
+    QString qssLineColor = getRandomLineColorQSS();
+    qDebug() << qssLineColor << endl;
+    ui->line->setStyleSheet(qssLineColor);
+    ui->playButton->setIcon(QIcon(":/icons/icons/play-solid.svg"));
+
     connect(ui->playButton, &QToolButton::clicked, this, &ProjectWidget::togglePlay);
 
     updateUI();
@@ -53,6 +59,15 @@ QString ProjectWidget::getPrettyCurrentSessionDuration()
         .arg(seconds, 2, 10, QChar('0'));
 }
 
+QString ProjectWidget::getRandomLineColorQSS()
+{
+    int red = QRandomGenerator::global()->bounded(256);
+    int green = QRandomGenerator::global()->bounded(256);
+    int blue = QRandomGenerator::global()->bounded(256);
+
+    return QString("color: rgb(%1, %2, %3);").arg(red).arg(green).arg(blue);
+}
+
 void ProjectWidget::updateCurrentSession(int elapsedTime)
 {
     currentSessionElapsedSecs += elapsedTime;
@@ -64,12 +79,12 @@ void ProjectWidget::togglePlay()
     if (!project->isRunning()) {
         project->start();
         startCurrentSessionTimer();
-        ui->playButton->setText("#");
+        ui->playButton->setIcon(QIcon(":/icons/icons/pause-solid.svg"));
     }
     else {
         project->stop();
         endCurrentSessionTimer();
-        ui->playButton->setText(">");
+        ui->playButton->setIcon(QIcon(":/icons/icons/play-solid.svg"));
     }
 
     updateUI();

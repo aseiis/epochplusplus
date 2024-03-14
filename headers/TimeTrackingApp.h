@@ -22,6 +22,8 @@ class TimeTrackingApp : public QMainWindow
 {
     Q_OBJECT
 
+// METHODS //
+
 public:
     TimeTrackingApp(QWidget *parent = nullptr);
     ~TimeTrackingApp();
@@ -36,6 +38,9 @@ private:
     void removeProjectWidgets();
     void refreshProjectsDisplay();
     QMessageBox* throwNewMessageBox(QString text, QFlags<QMessageBox::StandardButton> buttons, QMessageBox::StandardButton defaultButton = QMessageBox::NoButton, QString windowTitle = "");
+    void configureStyleSheet();
+
+// ATTRIBUTES //
 
 private:
     Ui::TimeTrackingAppClass *ui;

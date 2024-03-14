@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QtWidgets/QWidget>
+#include <QRandomGenerator>
 
 #include "../headers/ProjectData.h"
 
@@ -14,6 +15,8 @@ class ProjectWidget : public QWidget
 {
 	Q_OBJECT
 
+// METHODS //
+
 public:
 	ProjectWidget(QWidget* parent = nullptr, ProjectData* projectPtr = nullptr);
 	~ProjectWidget();
@@ -22,9 +25,14 @@ public:
 	void endCurrentSessionTimer();
 	QString getPrettyCurrentSessionDuration();
 
+private:
+	static QString getRandomLineColorQSS();
+
 public slots:
 	void updateCurrentSession(int elapsedTime = 0);
 	void togglePlay();
+
+// ATTRIBUTES //
 
 private:
 	Ui::ProjectWidgetClass* ui;

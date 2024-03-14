@@ -31,6 +31,8 @@ set(PROJECT_SOURCES
     src/ProjectWidget.cpp
     src/ProjectData.cpp
     src/Session.cpp
+    #RESOURCES
+    resources/Resources.qrc
 )
 
 qt_add_executable(TimeTrackingApp ${PROJECT_SOURCES})
