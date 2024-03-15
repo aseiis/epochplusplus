@@ -2,7 +2,7 @@
 
 #include <QtWidgets/QWidget>
 
-#include "../headers/ProjectData.h"
+#include "ProjectData.h"
 
 #include "../ui/ui_ProjectWidget.h"
 

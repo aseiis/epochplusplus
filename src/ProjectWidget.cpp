@@ -1,4 +1,4 @@
-#include "../headers/ProjectWidget.h"
+#include "ProjectWidget.h"
 
 ProjectWidget::ProjectWidget(QWidget* parent, ProjectData* projectPtr)
     : QWidget(parent), ui(new Ui::ProjectWidgetClass()), project(projectPtr)

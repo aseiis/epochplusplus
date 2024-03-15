@@ -1,4 +1,4 @@
-#include "../headers/Session.h"
+#include "Session.h"
 
 Session::Session(const int ID) : ID(ID)
 {

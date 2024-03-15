@@ -6,8 +6,8 @@
 #include <QInputDialog>
 #include <qmessagebox.h>
 
-#include "../headers/ProjectData.h"
-#include "../headers/ProjectWidget.h"
+#include "ProjectData.h"
+#include "ProjectWidget.h"
 
 #include "../ui/ui_TimeTrackingApp.h"
 

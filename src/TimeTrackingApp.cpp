@@ -1,4 +1,4 @@
-#include "../headers/TimeTrackingApp.h"
+#include "TimeTrackingApp.h"
 
 TimeTrackingApp::TimeTrackingApp(QWidget *parent)
     : QMainWindow(parent)

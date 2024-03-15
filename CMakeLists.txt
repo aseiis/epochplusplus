@@ -19,18 +19,16 @@ set(PROJECT_SOURCES
     #UI
     ui/TimeTrackingApp.ui
     ui/ProjectWidget.ui
-    #HEADERS
-    headers/TimeTrackingApp.h
-    headers/ProjectWidget.h
-    headers/ProjectData.h
-    headers/Session.h
-    headers/utils.h
     #SRC
     src/main.cpp
     src/TimeTrackingApp.cpp
+    src/TimeTrackingApp.h
     src/ProjectWidget.cpp
+    src/ProjectWidget.h
     src/ProjectData.cpp
+    src/ProjectData.h
     src/Session.cpp
+    src/Session.h
     #RESOURCES
     resources/Resources.qrc
 )
