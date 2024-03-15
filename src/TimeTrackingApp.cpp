@@ -107,18 +107,18 @@ void TimeTrackingApp::loadAndDisplayProjects()
 void TimeTrackingApp::askNewProject()
 {
     bool ok;
-    QString text = QInputDialog::getText(this, tr("New Project"),
+    QString userProjectNameInput = QInputDialog::getText(this, tr("New Project"),
         tr("Project Name:"), QLineEdit::Normal,
         "Unnamed Project", &ok);
 
-    if (ok && !text.isEmpty()) {
-        if (!isProjectNameUnique(text)) {
+    if (ok && !userProjectNameInput.isEmpty()) {
+        if (!isProjectNameUnique(userProjectNameInput)) {
             qWarning() << "ERROR: Project name already used. Aborting new project creation" << endl;
             throwNewMessageBox("Project name already used. Please provide a new, unique name.", QMessageBox::Ok)->exec();
             return;
         }
         
-        createProject(text);
+        createProject(userProjectNameInput);
     }
     else {
         qWarning() << "ERROR: Couldn't get new project name. Aborting new project creation" << endl;
@@ -127,7 +127,8 @@ void TimeTrackingApp::askNewProject()
 
 void TimeTrackingApp::createProject(QString& newProjectName)
 {
-    ProjectData* newProject = new ProjectData(newProjectName);
+    QString newProjectColor = ProjectData::newProjectColorQSS();
+    ProjectData* newProject = new ProjectData(newProjectName, newProjectColor);
     projects.push_back(newProject);
     newProjectWidget(newProject);
 }

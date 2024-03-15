@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QtWidgets/QWidget>
-#include <QRandomGenerator>
 
 #include "../headers/ProjectData.h"
 
@@ -24,9 +23,6 @@ public:
 	void startCurrentSessionTimer();
 	void endCurrentSessionTimer();
 	QString getPrettyCurrentSessionDuration();
-
-private:
-	static QString getRandomLineColorQSS();
 
 public slots:
 	void updateCurrentSession(int elapsedTime = 0);

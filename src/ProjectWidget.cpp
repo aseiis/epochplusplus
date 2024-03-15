@@ -11,10 +11,11 @@ ProjectWidget::ProjectWidget(QWidget* parent, ProjectData* projectPtr)
 
     ui->setupUi(this);
 
-    QString qssLineColor = getRandomLineColorQSS();
-    qDebug() << qssLineColor << endl;
-    ui->line->setStyleSheet(qssLineColor);
+    ui->line->setStyleSheet(project->getProjectColorQSS());
     ui->playButton->setIcon(QIcon(":/icons/icons/play-solid.svg"));
+
+    ui->editButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    ui->editButton->setIcon(QIcon(":/icons/icons/edit.svg"));
 
     connect(ui->playButton, &QToolButton::clicked, this, &ProjectWidget::togglePlay);
 
@@ -57,15 +58,6 @@ QString ProjectWidget::getPrettyCurrentSessionDuration()
     return QString("%1:%2s")
         .arg(minutes, 2, 10, QChar('0'))
         .arg(seconds, 2, 10, QChar('0'));
-}
-
-QString ProjectWidget::getRandomLineColorQSS()
-{
-    int red = QRandomGenerator::global()->bounded(256);
-    int green = QRandomGenerator::global()->bounded(256);
-    int blue = QRandomGenerator::global()->bounded(256);
-
-    return QString("color: rgb(%1, %2, %3);").arg(red).arg(green).arg(blue);
 }
 
 void ProjectWidget::updateCurrentSession(int elapsedTime)

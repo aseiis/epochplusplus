@@ -7,13 +7,16 @@
 #include <QDir>
 #include <QDataStream>
 #include <QDebug>
+#include <QRandomGenerator>
 #include "Session.h"
 #include "utils.h"
 
 class ProjectData
 {
+// METHODS //
+
 public:
-    ProjectData(const QString& name);
+    ProjectData(const QString& name, const QString& colorQSS = QString("color: rgb(200, 200, 200);"));
     ~ProjectData();
 
     void start();
@@ -26,13 +29,19 @@ public:
     bool loadFromFile(const QString& filePath);
     bool loadFromSave(const QString& projectName);
     QString& getProjectName();
+    static QString newProjectColorQSS();
+    QString getProjectColorQSS();
     int ID;
     bool isRunning();
-    
+
+// ATTRIBUTES //
+
+public:
     static int currentProjectCount;
 
 private:
     QString projectName;
+    QString projectColorQSS;
     int currentSessionID;
     Session* currentSession = nullptr;
     QList<Session> sessions;

@@ -2,7 +2,7 @@
 
 int ProjectData::currentProjectCount = 0;
 
-ProjectData::ProjectData(const QString& name) : projectName(name), ID(currentProjectCount)
+ProjectData::ProjectData(const QString& name, const QString& colorQSS) : projectName(name), projectColorQSS(colorQSS), ID(currentProjectCount)
 {
     currentSession = nullptr;
     currentSessionID = 0;
@@ -44,6 +44,15 @@ void ProjectData::stop()
 bool ProjectData::isRunning()
 {
     return currentSession != nullptr;
+}
+
+QString ProjectData::newProjectColorQSS()
+{
+    int red = QRandomGenerator::global()->bounded(256);
+    int green = QRandomGenerator::global()->bounded(256);
+    int blue = QRandomGenerator::global()->bounded(256);
+
+    return QString("color: rgb(%1, %2, %3);").arg(red).arg(green).arg(blue);
 }
 
 void ProjectData::addSession(const Session& session)
@@ -90,6 +99,8 @@ bool ProjectData::saveToFile(const QString& filePath)
 
     out << projectName;
 
+    out << projectColorQSS;
+
     out << quint32(sessions.count());
 
     qDebug() << "Serializing " << quint32(sessions.count()) << " sessions...";
@@ -120,6 +131,8 @@ bool ProjectData::loadFromFile(const QString& filePath)
 
     in >> projectName;
 
+    in >> projectColorQSS;
+
     quint32 sessionCount;
     in >> sessionCount;
 
@@ -141,4 +154,9 @@ bool ProjectData::loadFromSave(const QString& projectName)
 QString& ProjectData::getProjectName()
 {
     return projectName;
+}
+
+QString ProjectData::getProjectColorQSS()
+{
+    return this->projectColorQSS;
 }
