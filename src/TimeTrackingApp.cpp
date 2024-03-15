@@ -10,7 +10,8 @@ TimeTrackingApp::TimeTrackingApp(QWidget *parent)
 
     this->setWindowTitle(APP_NAME);
 
-    connect(ui->newProjectPushButton, &QPushButton::pressed, this, [this] { askNewProject(); });
+    connect(ui->newProjectPushButton, &QPushButton::pressed, this, &TimeTrackingApp::askNewProject);
+    connect(ui->actionNew, &QAction::triggered, this, &TimeTrackingApp::askNewProject);
 
     //Test
     //Run below to create projects than run them for some time, stop them (triggering a save) and recomment: it should then load with loadAllProjects();
