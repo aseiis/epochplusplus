@@ -35,10 +35,12 @@ set(PROJECT_SOURCES
 
 qt_add_executable(TimeTrackingApp ${PROJECT_SOURCES})
 
-set_target_properties(TimeTrackingApp
-    PROPERTIES
-        WIN32_EXECUTABLE TRUE
-)
+if(WIN32)
+    set_target_properties(TimeTrackingApp
+        PROPERTIES
+            WIN32_EXECUTABLE TRUE
+    )
+endif()
 
 target_link_libraries(TimeTrackingApp
     PUBLIC
