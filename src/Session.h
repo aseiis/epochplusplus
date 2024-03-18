@@ -5,6 +5,8 @@
 
 class Session
 {
+// METHODS //
+
 public:
     Session(const int ID);
     Session(const int ID, QDateTime start, QDateTime end);
@@ -13,8 +15,10 @@ public:
     void end();
     quint64 getDuration() const; // Calculate the duration of the session in seconds
     const QDateTime& getStartDateTime() const;
-    void Session::serialize(QDataStream& out) const;
-    void Session::deserialize(QDataStream& in);
+    void serialize(QDataStream& out) const;
+    void deserialize(QDataStream& in);
+
+// ATTRIBUTES //
 
 private:
     QDateTime startTime;

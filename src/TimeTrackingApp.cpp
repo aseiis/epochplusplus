@@ -73,7 +73,7 @@ void TimeTrackingApp::initSavesDir()
         QDir dir;
         if (!dir.mkpath(savesDirPath))
         {
-            qDebug() << "ERROR: Couldn't create directory at " << savesDirPath << endl;
+            qDebug() << "ERROR: Couldn't create directory at " << savesDirPath << Qt::endl;
             return;
         }
     }
@@ -83,7 +83,7 @@ void TimeTrackingApp::loadAndDisplayProjects()
 {
     QDir savesDir = QDir::currentPath() + DEF_SAVE_LOCATION;
     if (!savesDir.exists()) {
-        qWarning() << "Saves directory does not exist (path: " << savesDir << ")" << endl;
+        qWarning() << "Saves directory does not exist (path: " << savesDir << ")" << Qt::endl;
         return;
     }
 
@@ -114,7 +114,7 @@ void TimeTrackingApp::askNewProject()
 
     if (ok && !userProjectNameInput.isEmpty()) {
         if (!isProjectNameUnique(userProjectNameInput)) {
-            qWarning() << "ERROR: Project name already used. Aborting new project creation" << endl;
+            qWarning() << "ERROR: Project name already used. Aborting new project creation" << Qt::endl;
             throwNewMessageBox("Project name already used. Please provide a new, unique name.", QMessageBox::Ok)->exec();
             return;
         }
@@ -122,11 +122,11 @@ void TimeTrackingApp::askNewProject()
         createProject(userProjectNameInput);
     }
     else {
-        qWarning() << "ERROR: Couldn't get new project name. Aborting new project creation" << endl;
+        qWarning() << "ERROR: Couldn't get new project name. Aborting new project creation" << Qt::endl;
     }
 }
 
-void TimeTrackingApp::createProject(QString& newProjectName)
+void TimeTrackingApp::createProject(const QString &newProjectName)
 {
     QString newProjectColor = ProjectData::newProjectColorQSS();
     ProjectData* newProject = new ProjectData(newProjectName, newProjectColor);
@@ -193,7 +193,7 @@ void TimeTrackingApp::configureStyleSheet()
     QFile styleSheetFile(":/qss/default-style.qss");
     if (!styleSheetFile.open(QFile::ReadOnly))
     {
-        qDebug() << "Couldn't open QSS file" << endl;
+        qDebug() << "Couldn't open QSS file" <<  Qt::endl;
         return;
     }
 

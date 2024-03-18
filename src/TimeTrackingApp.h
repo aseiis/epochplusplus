@@ -32,7 +32,7 @@ private:
     void initSavesDir();
     void loadAndDisplayProjects();
     void askNewProject();
-    void createProject(QString& newProjectName = QString("Unnammed Project"));
+    void createProject(const QString& newProjectName = QString("__unnammed_project"));
     bool isProjectNameUnique(QString& testProjectName);
     void newProjectWidget(ProjectData* project);
     void removeProjectWidgets();
