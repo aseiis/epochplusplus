@@ -1,46 +1,46 @@
 /* 
-Custom Qt stylesheet for the Epoch++ app.
-https://github.com/aseiis/epochplusplus
+    Custom Qt stylesheet for the Epoch++ app.
+    https://github.com/aseiis/epochplusplus
 */
 
 /*
-	COLOR TABLES (need to copy/paste and hand correct because QSS is not SASS)
-	-- ALL COLORS USED IN THE APP MUST BE LISTED HERE
-	-- ANY COLOR THAT IS NOT LISTED THERE AND THAT APPEAR IN THE CODE SHOULD BE CONSIDERED DEPRECATED MATERIAL
-	default gray:	#F0F0F0
-	light gray:		#DBDBDB
-	medium gray:	#9E9E9E
-	 OLD ?
-	light green:	#
-	medium green:	#3D7068
-	deep green:		#14453D
-	 OLD ?
-	electric feel below___
-	vista blue:		#8390FA
-	red:			#ED1C24
-	off-white:		#FDFFFC
-	yellow:			#F1D302
-	black:			#020100
+    COLOR TABLES (need to copy/paste and hand correct because QSS is not SASS)
+    -- ALL COLORS USED IN THE APP MUST BE LISTED HERE
+    -- ANY COLOR THAT IS NOT LISTED THERE AND THAT APPEAR IN THE CODE SHOULD BE CONSIDERED DEPRECATED MATERIAL
+    default gray:           #F0F0F0
+    light gray:		#DBDBDB
+    medium gray:            #9E9E9E
+    light green:            #??????
+    medium green:           #3D7068
+    deep green:		#14453D
+
+    electric feel below___
+    vista blue:		#8390FA
+    red:			#ED1C24
+    off-white:		#FDFFFC
+    yellow:			#F1D302
+    black:			#020100
 */
 
 *
 {
-	font-family: "Roboto Condensed";
-	font-size: 12px;
+    font-family: "Roboto Condensed";
+    font-size: 12px;
 }
 
 QScrollArea#projectsScrollArea
 {
-	border: 0px;
+    border: 0px;
 }
 
 QWidget#projectsScrollAreaWidgetContents
 {
-	background-color: #F0F0F0;
+    #background-color: #F0F0F0
+    background: transparent;
 }
 
 ProjectWidget 
 {
-	border: 1px solid rgba(120, 120, 120, 255);
-	border-radius: 4px;
+    border: 1px solid rgba(120, 120, 120, 255);
+    border-radius: 4px;
 }
