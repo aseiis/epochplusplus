@@ -29,6 +29,7 @@ set(PROJECT_SOURCES
     src/ProjectData.h
     src/Session.cpp
     src/Session.h
+    src/utils.h
     #RESOURCES
     resources/Resources.qrc
 )

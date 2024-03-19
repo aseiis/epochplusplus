@@ -38,7 +38,7 @@ void ProjectData::stop()
     currentSession = nullptr;
     currentSessionID++;
 
-    saveToFile(QDir::currentPath() + DEF_SAVE_LOCATION + projectName);
+    saveToFile(QDir::currentPath() + Epochpp::DEF_SAVE_LOCATION + projectName);
 }
 
 bool ProjectData::isRunning()
@@ -85,7 +85,7 @@ QString ProjectData::getPrettyTotalDuration() const
 
 bool ProjectData::saveToFile(const QString& filePath)
 {
-    QString finalFilePath = filePath + "." + DEF_BIN_FILE_EXTENSION;
+    QString finalFilePath = filePath + "." + Epochpp::DEF_BIN_FILE_EXTENSION;
     qDebug() << "Saving to file " << finalFilePath;
     QFile file(finalFilePath);
     if (!file.open(QIODevice::WriteOnly))
@@ -147,7 +147,7 @@ bool ProjectData::loadFromFile(const QString& filePath)
 
 bool ProjectData::loadFromSave(const QString& projectName)
 {
-    QString path = QDir::currentPath() + DEF_SAVE_LOCATION + projectName;
+    QString path = QDir::currentPath() + Epochpp::DEF_SAVE_LOCATION + projectName;
     return loadFromFile(path);
 }
 
