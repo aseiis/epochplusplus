@@ -60,6 +60,11 @@ void ProjectData::addSession(const Session& session)
     sessions.append(session);
 }
 
+int ProjectData::getSessionsCount()
+{
+    return sessions.count();
+}
+
 QDateTime ProjectData::getCurrentSessionStartTime()
 {
     return currentSession->getStartDateTime();

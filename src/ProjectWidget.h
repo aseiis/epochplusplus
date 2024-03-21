@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QtWidgets/QWidget>
 
@@ -27,6 +27,7 @@ public:
 public slots:
 	void updateCurrentSession(int elapsedTime = 0);
 	void togglePlay();
+	void toggleDetails();
 
 // ATTRIBUTES //
 
@@ -35,5 +36,5 @@ private:
 	ProjectData* project;
 	quint64 currentSessionElapsedSecs;
 	QTimer* currentSessionTimer;
-
+	bool isExpanded;
 };

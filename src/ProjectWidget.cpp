@@ -7,17 +7,15 @@ ProjectWidget::ProjectWidget(QWidget* parent, ProjectData* projectPtr)
     currentSessionTimer = new QTimer();
     connect(currentSessionTimer, &QTimer::timeout, this, [this] { ProjectWidget::updateCurrentSession(1); });
 
-    setAttribute(Qt::WA_StyledBackground, true);
-
     ui->setupUi(this);
 
+    setAttribute(Qt::WA_StyledBackground, true);
+    isExpanded = false;
+    ui->details->hide();
     ui->line->setStyleSheet(project->getProjectColorQSS());
-    ui->playButton->setIcon(QIcon(":/icons/icons/play-solid.svg"));
-
-    ui->editButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    ui->editButton->setIcon(QIcon(":/icons/icons/edit.svg"));
 
     connect(ui->playButton, &QToolButton::clicked, this, &ProjectWidget::togglePlay);
+    connect(ui->expandButton, &QToolButton::clicked, this, &ProjectWidget::toggleDetails);
 
     updateUI();
 }
@@ -80,4 +78,20 @@ void ProjectWidget::togglePlay()
     }
 
     updateUI();
+}
+
+void ProjectWidget::toggleDetails()
+{
+    if (isExpanded) {
+        ui->details->hide();
+        isExpanded = false;
+        ui->expandButton->setText("More");
+        ui->expandButton->setIcon(QIcon(":/icons/icons/nav-arrow-down"));
+    }
+    else {
+        isExpanded = true;
+        ui->details->show();
+        ui->expandButton->setText("Close");
+        ui->expandButton->setIcon(QIcon(":/icons/icons/nav-arrow-up"));
+    }
 }
