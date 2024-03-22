@@ -38,7 +38,7 @@ void ProjectData::stop()
     currentSession = nullptr;
     currentSessionID++;
 
-    saveToFile(QDir::currentPath() + Epochpp::DEF_SAVE_LOCATION + projectName);
+    saveToFileAt(getFilepath());
 }
 
 bool ProjectData::isRunning()
@@ -88,14 +88,60 @@ QString ProjectData::getPrettyTotalDuration() const
     return QString("%1h %2m").arg(hours).arg(minutes, 2, 10, QChar('0'));
 }
 
-bool ProjectData::saveToFile(const QString& filePath)
+QString ProjectData::getAvgSessionDuration()
 {
-    QString finalFilePath = filePath + "." + Epochpp::DEF_BIN_FILE_EXTENSION;
-    qDebug() << "Saving to file " << finalFilePath;
-    QFile file(finalFilePath);
+    quint64 seconds = 0;
+    if (getSessionsCount() != 0) //avoid division by zero
+    {
+        seconds = getTotalDuration() / getSessionsCount();
+    }
+    int hours = seconds / 3600;
+    int minutes = (seconds / 3600) / 60;
+
+    return QString("%1h %2m").arg(hours).arg(minutes, 2, 10, QChar('0'));
+}
+
+int ProjectData::getActiveDaysCount()
+{
+    if (sessions.isEmpty()) {
+        return 0;
+    }
+
+    int activeDays = 1;
+
+    QDate lastDay = sessions.first().getStartDateTime().date();
+
+    for (Session& s : sessions)
+    {
+        QDate sDay = s.getStartDateTime().date();
+        if (sDay != lastDay) {
+            activeDays++;
+            lastDay = sDay;
+        }
+    }
+
+    return activeDays;
+}
+
+QString ProjectData::getAvgTimePerActiveDay()
+{
+    quint64 avgSeconds = 0;
+    if (getActiveDaysCount() != 0) //avoid division by zero
+    {
+        avgSeconds = getTotalDuration() / getActiveDaysCount();
+    }
+    int hours = avgSeconds / 3600;
+    int minutes = (avgSeconds / 3600) / 60;
+    return QString("%1h %2m").arg(hours).arg(minutes, 2, 10, QChar('0'));
+}
+
+bool ProjectData::saveToFileAt(const QString& filePath)
+{
+    qDebug() << "Saving to file " << filePath;
+    QFile file(filePath);
     if (!file.open(QIODevice::WriteOnly))
     {
-        qDebug() << "ERROR: Couldn't save file at " << finalFilePath << ". Error: " << file.errorString();
+        qDebug() << "ERROR: Couldn't save file at " << filePath << ". Error: " << file.errorString();
         return false;
     }
 
@@ -111,11 +157,16 @@ bool ProjectData::saveToFile(const QString& filePath)
     qDebug() << "Serializing " << quint32(sessions.count()) << " sessions...";
 
     for (const Session& session : sessions)
-    {
+    { 
         session.serialize(out);
     }
 
     return true;
+}
+
+QString ProjectData::getFilepath()
+{
+    return QString(QDir::currentPath() + Epochpp::DEF_SAVE_LOCATION + projectName + "." + Epochpp::DEF_BIN_FILE_EXTENSION);
 }
 
 bool ProjectData::loadFromFile(const QString& filePath)
@@ -159,6 +210,22 @@ bool ProjectData::loadFromSave(const QString& projectName)
 QString& ProjectData::getProjectName()
 {
     return projectName;
+}
+
+void ProjectData::rename(QString& newProjectName)
+{
+    if (newProjectName.isEmpty()) {
+        qDebug() << "WARNING: Tried to rename project (data level) but new project name is empty. Aborting" << Qt::endl;
+        return;
+    }
+
+    //delete soon-to-be-old file
+    QFile f = QFile(getFilepath());
+    f.remove();
+
+    projectName = newProjectName;
+
+    saveToFileAt(getFilepath());
 }
 
 QString ProjectData::getProjectColorQSS()

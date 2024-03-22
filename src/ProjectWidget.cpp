@@ -16,6 +16,7 @@ ProjectWidget::ProjectWidget(QWidget* parent, ProjectData* projectPtr)
 
     connect(ui->playButton, &QToolButton::clicked, this, &ProjectWidget::togglePlay);
     connect(ui->expandButton, &QToolButton::clicked, this, &ProjectWidget::toggleDetails);
+    connect(ui->renameButton, &QToolButton::clicked, this, [this] { ProjectWidget::rename(ui->renameLineEdit->text()); });
 
     updateUI();
 }
@@ -30,6 +31,10 @@ void ProjectWidget::updateUI()
 {
     ui->projectNameLabel->setText(project->getProjectName());
     ui->projectTotalDurationLabel->setText(project->getPrettyTotalDuration());
+    ui->nbSessionsLabel->setText(QString("%1 sessions").arg(project->getSessionsCount()));
+    ui->avgSessionDurationLabel->setText(QString("Average session duration: %1").arg(project->getAvgSessionDuration()));
+    ui->nbActiveDaysLabel->setText(QString("%1 active days").arg(project->getActiveDaysCount()));
+    ui->avgTimePerDayLabel->setText(QString("Average time per active day: %1").arg(project->getAvgTimePerActiveDay()));
 }
 
 void ProjectWidget::startCurrentSessionTimer()
@@ -94,4 +99,16 @@ void ProjectWidget::toggleDetails()
         ui->expandButton->setText("Close");
         ui->expandButton->setIcon(QIcon(":/icons/icons/nav-arrow-up"));
     }
+}
+
+void ProjectWidget::rename(QString& newProjectName)
+{
+    if (newProjectName.isEmpty()) {
+        MsgBoxGen::throwNewMessageBox(Epochpp::g_mainWindow, "Project name already used. Please provide a new, unique name.", QMessageBox::Ok)->exec();
+        qDebug() << "WARNING: Tried to rename project (widget level) but new project name is empty. Aborting" << Qt::endl;
+    }
+
+    project->rename(newProjectName);
+    ui->renameLineEdit->setText("");
+    updateUI();
 }

@@ -24,10 +24,10 @@ public:
 	void endCurrentSessionTimer();
 	QString getPrettyCurrentSessionDuration();
 
-public slots:
 	void updateCurrentSession(int elapsedTime = 0);
 	void togglePlay();
 	void toggleDetails();
+	void rename(QString& newProjectName);
 
 // ATTRIBUTES //
 

@@ -8,7 +8,9 @@ TimeTrackingApp::TimeTrackingApp(QWidget *parent)
 
     ui->setupUi(this);
 
-    this->setWindowTitle(APP_NAME);
+    Epochpp::setMainWindow(this);
+
+    this->setWindowTitle(Epochpp::APP_NAME);
 
     connect(ui->newProjectPushButton, &QPushButton::pressed, this, &TimeTrackingApp::askNewProject);
     connect(ui->actionNew, &QAction::triggered, this, &TimeTrackingApp::askNewProject);
@@ -98,7 +100,7 @@ void TimeTrackingApp::askNewProject()
     if (ok && !userProjectNameInput.isEmpty()) {
         if (!isProjectNameUnique(userProjectNameInput)) {
             qWarning() << "ERROR: Project name already used. Aborting new project creation" << Qt::endl;
-            throwNewMessageBox(this, "Project name already used. Please provide a new, unique name.", QMessageBox::Ok)->exec();
+            MsgBoxGen::throwNewMessageBox(this, "Project name already used. Please provide a new, unique name.", QMessageBox::Ok)->exec();
             return;
         }
         
@@ -136,6 +138,7 @@ void TimeTrackingApp::newProjectWidget(ProjectData* project)
     scrollAreaVBoxLayout->insertWidget(scrollAreaVBoxLayout->count() - 1, newProjectVm);
 }
 
+/*
 void TimeTrackingApp::removeProjectWidgets()
 {
     QLayoutItem* child;
@@ -150,26 +153,7 @@ void TimeTrackingApp::refreshProjectsDisplay()
 {
     removeProjectWidgets();
 }
-
-QMessageBox* TimeTrackingApp::throwNewMessageBox(QMainWindow* mainWindow, QString text, QFlags<QMessageBox::StandardButton> buttons, QMessageBox::StandardButton defaultButton, QString windowTitle)
-{
-    QMessageBox* msgBox = new QMessageBox(mainWindow->centralWidget());
-
-    if (windowTitle == "")
-        msgBox->setWindowTitle(APP_NAME);
-    else
-        msgBox->setWindowTitle(windowTitle);
-
-    msgBox->setText(text);
-    msgBox->setStandardButtons(buttons);
-
-    if (defaultButton != QMessageBox::NoButton)
-        msgBox->setDefaultButton(defaultButton);
-
-    //msgBox->setIconPixmap(QPixmap(":/icon.png"));
-
-    return msgBox;
-}
+*/
 
 void TimeTrackingApp::configureStyleSheet()
 {

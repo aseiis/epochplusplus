@@ -16,8 +16,6 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class TimeTrackingAppClass; };
 QT_END_NAMESPACE
 
-const QString APP_NAME = QString("Epoch++");
-
 class TimeTrackingApp : public QMainWindow
 {
     Q_OBJECT
@@ -27,7 +25,6 @@ class TimeTrackingApp : public QMainWindow
 public:
     TimeTrackingApp(QWidget *parent = nullptr);
     ~TimeTrackingApp();
-    static QMessageBox* throwNewMessageBox(QMainWindow* mainWindow, QString text, QFlags<QMessageBox::StandardButton> buttons, QMessageBox::StandardButton defaultButton = QMessageBox::NoButton, QString windowTitle = "");
 
 private:
     void initSavesDir();
@@ -36,8 +33,10 @@ private:
     void createProject(const QString& newProjectName = QString("__unnammed_project"));
     bool isProjectNameUnique(QString& testProjectName);
     void newProjectWidget(ProjectData* project);
-    void removeProjectWidgets();
+    /*
     void refreshProjectsDisplay();
+    void removeProjectWidgets();
+    */
     void configureStyleSheet();
 
 // ATTRIBUTES //

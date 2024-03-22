@@ -30,6 +30,7 @@ set(PROJECT_SOURCES
     src/Session.cpp
     src/Session.h
     src/utils.h
+    src/utils.cpp
     #RESOURCES
     resources/Resources.qrc
 )

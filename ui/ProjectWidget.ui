@@ -332,7 +332,7 @@
             <item>
              <widget class="QLabel" name="nbSessionsLabel">
               <property name="text">
-               <string>Number of sessions: N</string>
+               <string>N sessions</string>
               </property>
              </widget>
             </item>
@@ -340,6 +340,13 @@
              <widget class="QLabel" name="avgSessionDurationLabel">
               <property name="text">
                <string>Average session duration: N</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="nbActiveDaysLabel">
+              <property name="text">
+               <string>N active days</string>
               </property>
              </widget>
             </item>
