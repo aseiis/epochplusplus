@@ -98,7 +98,7 @@ void TimeTrackingApp::askNewProject()
     if (ok && !userProjectNameInput.isEmpty()) {
         if (!isProjectNameUnique(userProjectNameInput)) {
             qWarning() << "ERROR: Project name already used. Aborting new project creation" << Qt::endl;
-            throwNewMessageBox("Project name already used. Please provide a new, unique name.", QMessageBox::Ok)->exec();
+            throwNewMessageBox(this, "Project name already used. Please provide a new, unique name.", QMessageBox::Ok)->exec();
             return;
         }
         
@@ -151,9 +151,9 @@ void TimeTrackingApp::refreshProjectsDisplay()
     removeProjectWidgets();
 }
 
-QMessageBox* TimeTrackingApp::throwNewMessageBox(QString text, QFlags<QMessageBox::StandardButton> buttons, QMessageBox::StandardButton defaultButton, QString windowTitle)
+QMessageBox* TimeTrackingApp::throwNewMessageBox(QMainWindow* mainWindow, QString text, QFlags<QMessageBox::StandardButton> buttons, QMessageBox::StandardButton defaultButton, QString windowTitle)
 {
-    QMessageBox* msgBox = new QMessageBox(this->centralWidget());
+    QMessageBox* msgBox = new QMessageBox(mainWindow->centralWidget());
 
     if (windowTitle == "")
         msgBox->setWindowTitle(APP_NAME);
