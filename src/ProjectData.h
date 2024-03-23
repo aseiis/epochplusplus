@@ -34,7 +34,7 @@ public:
     bool loadFromFile(const QString& filePath);
     bool loadFromSave(const QString& projectName);
     QString& getProjectName();
-    void rename(QString& newProjectName);
+    void rename(const QString& newProjectName);
     static QString newProjectColorQSS();
     QString getProjectColorQSS();
     int ID;

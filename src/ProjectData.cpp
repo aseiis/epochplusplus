@@ -212,7 +212,7 @@ QString& ProjectData::getProjectName()
     return projectName;
 }
 
-void ProjectData::rename(QString& newProjectName)
+void ProjectData::rename(const QString& newProjectName)
 {
     if (newProjectName.isEmpty()) {
         qDebug() << "WARNING: Tried to rename project (data level) but new project name is empty. Aborting" << Qt::endl;

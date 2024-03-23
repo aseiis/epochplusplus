@@ -27,7 +27,7 @@ public:
 	void updateCurrentSession(int elapsedTime = 0);
 	void togglePlay();
 	void toggleDetails();
-	void rename(QString& newProjectName);
+    void rename(const QString& newProjectName);
 
 // ATTRIBUTES //
 

@@ -101,7 +101,7 @@ void ProjectWidget::toggleDetails()
     }
 }
 
-void ProjectWidget::rename(QString& newProjectName)
+void ProjectWidget::rename(const QString& newProjectName)
 {
     if (newProjectName.isEmpty()) {
         MsgBoxGen::throwNewMessageBox(Epochpp::g_mainWindow, "Project name already used. Please provide a new, unique name.", QMessageBox::Ok)->exec();
