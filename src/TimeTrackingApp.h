@@ -1,7 +1,5 @@
 #pragma once
 
-#include <iostream>
-
 #include <QtWidgets/QMainWindow>
 #include <QInputDialog>
 #include <qmessagebox.h>
@@ -15,8 +13,6 @@
 QT_BEGIN_NAMESPACE
 namespace Ui { class TimeTrackingAppClass; };
 QT_END_NAMESPACE
-
-const QString APP_NAME = QString("Epoch++");
 
 class TimeTrackingApp : public QMainWindow
 {
@@ -35,10 +31,18 @@ private:
     void createProject(const QString& newProjectName = QString("__unnammed_project"));
     bool isProjectNameUnique(QString& testProjectName);
     void newProjectWidget(ProjectData* project);
-    void removeProjectWidgets();
+    /*
     void refreshProjectsDisplay();
-    QMessageBox* throwNewMessageBox(QString text, QFlags<QMessageBox::StandardButton> buttons, QMessageBox::StandardButton defaultButton = QMessageBox::NoButton, QString windowTitle = "");
+    void removeProjectWidgets();
+    */
     void configureStyleSheet();
+
+// SLOTS //
+
+public slots:
+    void deleteProject(int projectID);
+
+// SIGNALS //
 
 // ATTRIBUTES //
 

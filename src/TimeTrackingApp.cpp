@@ -8,7 +8,11 @@ TimeTrackingApp::TimeTrackingApp(QWidget *parent)
 
     ui->setupUi(this);
 
-    this->setWindowTitle(APP_NAME);
+    Epochpp::setMainWindow(this);
+
+    this->setWindowTitle(Epochpp::APP_NAME);
+
+    //self UI connect
 
     connect(ui->newProjectPushButton, &QPushButton::pressed, this, &TimeTrackingApp::askNewProject);
     connect(ui->actionNew, &QAction::triggered, this, &TimeTrackingApp::askNewProject);
@@ -98,7 +102,7 @@ void TimeTrackingApp::askNewProject()
     if (ok && !userProjectNameInput.isEmpty()) {
         if (!isProjectNameUnique(userProjectNameInput)) {
             qWarning() << "ERROR: Project name already used. Aborting new project creation" << Qt::endl;
-            throwNewMessageBox("Project name already used. Please provide a new, unique name.", QMessageBox::Ok)->exec();
+            MsgBoxGen::throwNewMessageBox(this, "Project name already used. Please provide a new, unique name.", QMessageBox::Ok)->exec();
             return;
         }
         
@@ -134,8 +138,40 @@ void TimeTrackingApp::newProjectWidget(ProjectData* project)
     ProjectWidget* newProjectVm = new ProjectWidget(this, project);
     projectsVm.push_back(newProjectVm);
     scrollAreaVBoxLayout->insertWidget(scrollAreaVBoxLayout->count() - 1, newProjectVm);
+    qDebug() << "Connecting" << Qt::endl;
+    connect(newProjectVm, &ProjectWidget::requestProjectDeletion, this, &TimeTrackingApp::deleteProject);
 }
 
+void TimeTrackingApp::deleteProject(int projectID)
+{
+    auto widgetIt = std::find_if(projectsVm.begin(), projectsVm.end(), [projectID](ProjectWidget* widget) {
+        return widget->project->ID == projectID;
+    });
+    if (widgetIt != projectsVm.end()) {
+        ProjectWidget* widget = *widgetIt;
+        scrollAreaVBoxLayout->removeWidget(widget);
+        widget->hide();
+        widget->deleteLater();
+        projectsVm.erase(widgetIt);
+    } else {
+        MsgBoxGen::throwNewMessageBox(Epochpp::g_mainWindow,
+                                      QString("Couldn't delete project"),
+                                      QMessageBox::Ok,
+                                      QMessageBox::Ok,
+                                      "Error");
+        return;
+    }
+
+    auto it = std::find_if(projects.begin(), projects.end(), [projectID](ProjectData* project) {
+        return project->ID == projectID;
+    });
+    if (it != projects.end()) {
+        delete *it;
+        projects.erase(it);
+    }
+}
+
+/*
 void TimeTrackingApp::removeProjectWidgets()
 {
     QLayoutItem* child;
@@ -150,26 +186,7 @@ void TimeTrackingApp::refreshProjectsDisplay()
 {
     removeProjectWidgets();
 }
-
-QMessageBox* TimeTrackingApp::throwNewMessageBox(QString text, QFlags<QMessageBox::StandardButton> buttons, QMessageBox::StandardButton defaultButton, QString windowTitle)
-{
-    QMessageBox* msgBox = new QMessageBox(this->centralWidget());
-
-    if (windowTitle == "")
-        msgBox->setWindowTitle(APP_NAME);
-    else
-        msgBox->setWindowTitle(windowTitle);
-
-    msgBox->setText(text);
-    msgBox->setStandardButtons(buttons);
-
-    if (defaultButton != QMessageBox::NoButton)
-        msgBox->setDefaultButton(defaultButton);
-
-    //msgBox->setIconPixmap(QPixmap(":/icon.png"));
-
-    return msgBox;
-}
+*/
 
 void TimeTrackingApp::configureStyleSheet()
 {

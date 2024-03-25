@@ -21,14 +21,21 @@ public:
 
     void start();
     void stop();
+    void deleteSaveFile();
     void addSession(const Session& session);
+    int getSessionsCount();
     QDateTime getCurrentSessionStartTime();
     quint64 getTotalDuration() const;                           // Calculate total duration of all sessions
     QString getPrettyTotalDuration() const;                     // Formatted hh:mm:ss
-    bool saveToFile(const QString& filePath);
+    QString getAvgSessionDuration();
+    int getActiveDaysCount();
+    QString getAvgTimePerActiveDay();
+    bool saveToFileAt(const QString& filePath);
+    QString getFilepath();
     bool loadFromFile(const QString& filePath);
     bool loadFromSave(const QString& projectName);
     QString& getProjectName();
+    void rename(const QString& newProjectName);
     static QString newProjectColorQSS();
     QString getProjectColorQSS();
     int ID;
