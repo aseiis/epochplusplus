@@ -367,7 +367,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>120</width>
+                <width>140</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -430,6 +430,9 @@
             </item>
             <item>
              <widget class="QPushButton" name="changeColorButton">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="maximumSize">
                <size>
                 <width>120</width>

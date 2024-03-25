@@ -21,6 +21,7 @@ public:
 
     void start();
     void stop();
+    void deleteSaveFile();
     void addSession(const Session& session);
     int getSessionsCount();
     QDateTime getCurrentSessionStartTime();

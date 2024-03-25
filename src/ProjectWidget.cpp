@@ -17,6 +17,7 @@ ProjectWidget::ProjectWidget(QWidget* parent, ProjectData* projectPtr)
     connect(ui->playButton, &QToolButton::clicked, this, &ProjectWidget::togglePlay);
     connect(ui->expandButton, &QToolButton::clicked, this, &ProjectWidget::toggleDetails);
     connect(ui->renameButton, &QToolButton::clicked, this, [this] { ProjectWidget::rename(ui->renameLineEdit->text()); });
+    connect(ui->deleteButton, &QToolButton::clicked, this, &ProjectWidget::askDelete);
 
     updateUI();
 }
@@ -111,4 +112,26 @@ void ProjectWidget::rename(const QString& newProjectName)
     project->rename(newProjectName);
     ui->renameLineEdit->setText("");
     updateUI();
+}
+
+void ProjectWidget::askDelete()
+{
+    int res = MsgBoxGen::throwNewMessageBox(Epochpp::g_mainWindow,
+                            QString("Are you sure you want to delete \"%1\" project?").arg(project->getProjectName()),
+                            QMessageBox::Ok | QMessageBox::Cancel,
+                            QMessageBox::Cancel,
+                            "Project Delete")->exec();
+    if(res == QMessageBox::Ok){
+        immediateDelete();
+    }
+}
+
+void ProjectWidget::immediateDelete()
+{
+    emit requestProjectDeletion(project->ID);
+    //bool deletionSuccessful = ...;
+    //if(deletionSuccessful)
+    // ... REMOVE WIDGET
+    //else
+    // ... DONT
 }

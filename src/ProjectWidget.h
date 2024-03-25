@@ -28,12 +28,24 @@ public:
 	void togglePlay();
 	void toggleDetails();
     void rename(const QString& newProjectName);
+    void askDelete();
+    void immediateDelete();
+
+// SLOTS //
+
+// SIGNALS //
+
+signals:
+    void requestProjectDeletion(int projectID);
 
 // ATTRIBUTES //
 
+//TODO: CHANGE VISIBILITY AND MANAGE DEPENDENCY
+public:
+    ProjectData* project;
+
 private:
 	Ui::ProjectWidgetClass* ui;
-	ProjectData* project;
 	quint64 currentSessionElapsedSecs;
 	QTimer* currentSessionTimer;
 	bool isExpanded;

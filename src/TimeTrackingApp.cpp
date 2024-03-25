@@ -12,6 +12,8 @@ TimeTrackingApp::TimeTrackingApp(QWidget *parent)
 
     this->setWindowTitle(Epochpp::APP_NAME);
 
+    //self UI connect
+
     connect(ui->newProjectPushButton, &QPushButton::pressed, this, &TimeTrackingApp::askNewProject);
     connect(ui->actionNew, &QAction::triggered, this, &TimeTrackingApp::askNewProject);
 
@@ -136,6 +138,37 @@ void TimeTrackingApp::newProjectWidget(ProjectData* project)
     ProjectWidget* newProjectVm = new ProjectWidget(this, project);
     projectsVm.push_back(newProjectVm);
     scrollAreaVBoxLayout->insertWidget(scrollAreaVBoxLayout->count() - 1, newProjectVm);
+    qDebug() << "Connecting" << Qt::endl;
+    connect(newProjectVm, &ProjectWidget::requestProjectDeletion, this, &TimeTrackingApp::deleteProject);
+}
+
+void TimeTrackingApp::deleteProject(int projectID)
+{
+    auto widgetIt = std::find_if(projectsVm.begin(), projectsVm.end(), [projectID](ProjectWidget* widget) {
+        return widget->project->ID == projectID;
+    });
+    if (widgetIt != projectsVm.end()) {
+        ProjectWidget* widget = *widgetIt;
+        scrollAreaVBoxLayout->removeWidget(widget);
+        widget->hide();
+        widget->deleteLater();
+        projectsVm.erase(widgetIt);
+    } else {
+        MsgBoxGen::throwNewMessageBox(Epochpp::g_mainWindow,
+                                      QString("Couldn't delete project"),
+                                      QMessageBox::Ok,
+                                      QMessageBox::Ok,
+                                      "Error");
+        return;
+    }
+
+    auto it = std::find_if(projects.begin(), projects.end(), [projectID](ProjectData* project) {
+        return project->ID == projectID;
+    });
+    if (it != projects.end()) {
+        delete *it;
+        projects.erase(it);
+    }
 }
 
 /*

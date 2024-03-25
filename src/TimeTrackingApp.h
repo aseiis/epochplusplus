@@ -1,7 +1,5 @@
 #pragma once
 
-#include <iostream>
-
 #include <QtWidgets/QMainWindow>
 #include <QInputDialog>
 #include <qmessagebox.h>
@@ -38,6 +36,13 @@ private:
     void removeProjectWidgets();
     */
     void configureStyleSheet();
+
+// SLOTS //
+
+public slots:
+    void deleteProject(int projectID);
+
+// SIGNALS //
 
 // ATTRIBUTES //
 

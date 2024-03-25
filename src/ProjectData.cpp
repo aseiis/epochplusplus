@@ -41,6 +41,12 @@ void ProjectData::stop()
     saveToFileAt(getFilepath());
 }
 
+void ProjectData::deleteSaveFile()
+{
+    QFile f = QFile(getFilepath());
+    f.remove();
+}
+
 bool ProjectData::isRunning()
 {
     return currentSession != nullptr;
@@ -220,8 +226,7 @@ void ProjectData::rename(const QString& newProjectName)
     }
 
     //delete soon-to-be-old file
-    QFile f = QFile(getFilepath());
-    f.remove();
+    deleteSaveFile();
 
     projectName = newProjectName;
 
