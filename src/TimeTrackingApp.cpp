@@ -166,6 +166,7 @@ void TimeTrackingApp::deleteProject(int projectID)
         return project->ID == projectID;
     });
     if (it != projects.end()) {
+        (*it)->deleteSaveFile();
         delete *it;
         projects.erase(it);
     }
