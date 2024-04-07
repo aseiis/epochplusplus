@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <QtWidgets/QWidget>
+#include <QColorDialog>
 
 #include "ProjectData.h"
 
@@ -30,6 +31,7 @@ public:
     void rename(const QString& newProjectName);
     void askDelete();
     void immediateDelete();
+    void askAndSetColor();
 
 // SLOTS //
 
@@ -48,5 +50,5 @@ private:
 	Ui::ProjectWidgetClass* ui;
 	quint64 currentSessionElapsedSecs;
 	QTimer* currentSessionTimer;
-	bool isExpanded;
+    bool isExpanded;
 };

@@ -16,7 +16,7 @@ class ProjectData
 // METHODS //
 
 public:
-    ProjectData(const QString& name, const QString& colorQSS = QString("color: rgb(200, 200, 200);"));
+    ProjectData(const QString& name);
     ~ProjectData();
 
     void start();
@@ -30,20 +30,23 @@ public:
     QString getAvgSessionDuration();
     int getActiveDaysCount();
     QString getAvgTimePerActiveDay();
-    bool saveToFileAt(const QString& filePath);
+    bool saveToFile();
     QString getFilepath();
     bool loadFromFile(const QString& filePath);
     bool loadFromSave(const QString& projectName);
     QString& getProjectName();
     void rename(const QString& newProjectName);
-    static QString newProjectColorQSS();
     QString getProjectColorQSS();
-    int ID;
+    void setProjectColorQSS(QColor newColor);
     bool isRunning();
+
+private:
+    static QString newProjectColorQSS();
 
 // ATTRIBUTES //
 
 public:
+    int ID;
     static int currentProjectCount;
 
 private:

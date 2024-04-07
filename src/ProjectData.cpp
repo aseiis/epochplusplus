@@ -2,12 +2,13 @@
 
 int ProjectData::currentProjectCount = 0;
 
-ProjectData::ProjectData(const QString& name, const QString& colorQSS) : projectName(name), projectColorQSS(colorQSS), ID(currentProjectCount)
+ProjectData::ProjectData(const QString& name) : projectName(name), ID(currentProjectCount)
 {
     currentSession = nullptr;
     currentSessionID = 0;
     sessions = QList<Session>();
     currentProjectCount++;
+    projectColorQSS = newProjectColorQSS();
 }
 
 ProjectData::~ProjectData()
@@ -38,11 +39,12 @@ void ProjectData::stop()
     currentSession = nullptr;
     currentSessionID++;
 
-    saveToFileAt(getFilepath());
+    saveToFile();
 }
 
 void ProjectData::deleteSaveFile()
 {
+    qDebug() << "Deleting file at " << getFilepath();
     QFile f = QFile(getFilepath());
     f.remove();
 }
@@ -63,6 +65,7 @@ QString ProjectData::newProjectColorQSS()
 
 void ProjectData::addSession(const Session& session)
 {
+    qDebug() << "Adding a new session to " << projectName;
     sessions.append(session);
 }
 
@@ -141,8 +144,9 @@ QString ProjectData::getAvgTimePerActiveDay()
     return QString("%1h %2m").arg(hours).arg(minutes, 2, 10, QChar('0'));
 }
 
-bool ProjectData::saveToFileAt(const QString& filePath)
+bool ProjectData::saveToFile()
 {
+    QString filePath = getFilepath();
     qDebug() << "Saving to file " << filePath;
     QFile file(filePath);
     if (!file.open(QIODevice::WriteOnly))
@@ -230,10 +234,16 @@ void ProjectData::rename(const QString& newProjectName)
 
     projectName = newProjectName;
 
-    saveToFileAt(getFilepath());
+    saveToFile();
 }
 
 QString ProjectData::getProjectColorQSS()
 {
     return this->projectColorQSS;
+}
+
+void ProjectData::setProjectColorQSS(QColor newColor)
+{
+    projectColorQSS = QString("color: rgb(%1, %2, %3)").arg(newColor.red()).arg(newColor.green()).arg(newColor.blue());
+    saveToFile();
 }

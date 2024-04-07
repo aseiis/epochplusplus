@@ -115,8 +115,7 @@ void TimeTrackingApp::askNewProject()
 
 void TimeTrackingApp::createProject(const QString &newProjectName)
 {
-    QString newProjectColor = ProjectData::newProjectColorQSS();
-    ProjectData* newProject = new ProjectData(newProjectName, newProjectColor);
+    ProjectData* newProject = new ProjectData(newProjectName);
     projects.push_back(newProject);
     newProjectWidget(newProject);
 }
@@ -166,6 +165,7 @@ void TimeTrackingApp::deleteProject(int projectID)
         return project->ID == projectID;
     });
     if (it != projects.end()) {
+        (*it)->deleteSaveFile();
         delete *it;
         projects.erase(it);
     }

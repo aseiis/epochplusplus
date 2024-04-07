@@ -18,6 +18,7 @@ ProjectWidget::ProjectWidget(QWidget* parent, ProjectData* projectPtr)
     connect(ui->expandButton, &QToolButton::clicked, this, &ProjectWidget::toggleDetails);
     connect(ui->renameButton, &QToolButton::clicked, this, [this] { ProjectWidget::rename(ui->renameLineEdit->text()); });
     connect(ui->deleteButton, &QToolButton::clicked, this, &ProjectWidget::askDelete);
+    connect(ui->changeColorButton,&QToolButton::clicked, this, &ProjectWidget::askAndSetColor);
 
     updateUI();
 }
@@ -134,4 +135,15 @@ void ProjectWidget::immediateDelete()
     // ... REMOVE WIDGET
     //else
     // ... DONT
+}
+
+void ProjectWidget::askAndSetColor()
+{
+    QColor newColor = QColorDialog::getColor();
+    if(!newColor.isValid()){
+        MsgBoxGen::throwNewMessageBox(Epochpp::g_mainWindow, "Invalid color", QMessageBox::Ok)->exec();
+        return;
+    }
+    project->setProjectColorQSS(newColor);
+    ui->line->setStyleSheet(project->getProjectColorQSS());
 }

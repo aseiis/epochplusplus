@@ -431,7 +431,7 @@
             <item>
              <widget class="QPushButton" name="changeColorButton">
               <property name="enabled">
-               <bool>false</bool>
+               <bool>true</bool>
               </property>
               <property name="maximumSize">
                <size>
