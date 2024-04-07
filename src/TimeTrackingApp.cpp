@@ -115,8 +115,7 @@ void TimeTrackingApp::askNewProject()
 
 void TimeTrackingApp::createProject(const QString &newProjectName)
 {
-    QString newProjectColor = ProjectData::newProjectColorQSS();
-    ProjectData* newProject = new ProjectData(newProjectName, newProjectColor);
+    ProjectData* newProject = new ProjectData(newProjectName);
     projects.push_back(newProject);
     newProjectWidget(newProject);
 }
