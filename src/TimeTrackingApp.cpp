@@ -137,7 +137,6 @@ void TimeTrackingApp::newProjectWidget(ProjectData* project)
     ProjectWidget* newProjectVm = new ProjectWidget(this, project);
     projectsVm.push_back(newProjectVm);
     scrollAreaVBoxLayout->insertWidget(scrollAreaVBoxLayout->count() - 1, newProjectVm);
-    qDebug() << "Connecting" << Qt::endl;
     connect(newProjectVm, &ProjectWidget::requestProjectDeletion, this, &TimeTrackingApp::deleteProject);
 }
 

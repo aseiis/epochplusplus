@@ -105,7 +105,7 @@ QString ProjectData::getAvgSessionDuration()
         seconds = getTotalDuration() / getSessionsCount();
     }
     int hours = seconds / 3600;
-    int minutes = (seconds / 3600) / 60;
+    int minutes = (seconds % 3600) / 60;
 
     return QString("%1h %2m").arg(hours).arg(minutes, 2, 10, QChar('0'));
 }
@@ -140,7 +140,7 @@ QString ProjectData::getAvgTimePerActiveDay()
         avgSeconds = getTotalDuration() / getActiveDaysCount();
     }
     int hours = avgSeconds / 3600;
-    int minutes = (avgSeconds / 3600) / 60;
+    int minutes = (avgSeconds % 3600) / 60;
     return QString("%1h %2m").arg(hours).arg(minutes, 2, 10, QChar('0'));
 }
 
