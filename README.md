@@ -13,7 +13,6 @@ On Ubuntu (GNOME):
 🗹 Display project stats by processing sessions data <br/>
 🗹 Use colors to distringuish projects and assign new custom one via dialog picker <br/>
 🗹 Display "Edit" and "Stats" features inside a collapsable panel <br/> 
-☐ Average time per session/per active day (need fix) <br/>
 ☐ Manual add session (also for testing purpose) <br/>
 ☐ Year active days and sessions count per day graph calendar (similar to GitHub/GitLab profiles) <br/>
 ☐ Stacked widgets to differentiate stats and edit (maybe needed after having the calendar)? <br/>
@@ -21,6 +20,7 @@ On Ubuntu (GNOME):
 <u>VERSION 1.X</u> <br/>
 ☐ Make project cards moveable (drag-and-drop) <br/>
 ☐ Rethink the window size policy (is set fixed for now for simplicity) <br/>
+☐ More flexibily with save files (edit save file location by user?) <br/>
 
 ## Building and compatibility
 
