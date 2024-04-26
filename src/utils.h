@@ -6,12 +6,19 @@
 // GLOBAL
 
 namespace Epochpp {
+    // CONSTANTS //
     inline const QString APP_NAME = QString("Epoch++");
     inline const char* DEF_BIN_FILE_EXTENSION = "timesheet";
     inline const char* DEF_SAVE_LOCATION = "/saves/";
 
+    // GLOBAL ACCESS //
+
     inline QMainWindow* g_mainWindow = nullptr;
     void setMainWindow(QMainWindow* mainWindow);
+
+    // UTILS FUNCTIONS //
+    QString secsToMS(quint64 totalSeconds);
+    QString secsToHM(quint64 totalSeconds);
 }
 
 namespace MsgBoxGen {

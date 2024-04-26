@@ -19,6 +19,7 @@ ProjectWidget::ProjectWidget(QWidget* parent, ProjectData* projectPtr)
     connect(ui->renameButton, &QToolButton::clicked, this, [this] { ProjectWidget::rename(ui->renameLineEdit->text()); });
     connect(ui->deleteButton, &QToolButton::clicked, this, &ProjectWidget::askDelete);
     connect(ui->changeColorButton,&QToolButton::clicked, this, &ProjectWidget::askAndSetColor);
+    connect(ui->addSessionButton, &QToolButton::clicked, this, &ProjectWidget::askSessionData);
 
     updateUI();
 }
@@ -56,13 +57,11 @@ QString ProjectWidget::getPrettyCurrentSessionDuration()
 {
     quint64 sessionDuration = currentSessionElapsedSecs;
 
-    int minutes = static_cast<int>((sessionDuration / 60) % 60);
-    int seconds = static_cast<int>(sessionDuration % 60);
-
-    // Formatting the output as mm:ss
-    return QString("%1:%2s")
-        .arg(minutes, 2, 10, QChar('0'))
-        .arg(seconds, 2, 10, QChar('0'));
+    //  Past half an hour for a running session, we display as HH:MM and instead of MM::SS
+    if (sessionDuration < 3200)
+        return Epochpp::secsToMS(sessionDuration);
+    else
+        return Epochpp::secsToHM(sessionDuration);
 }
 
 void ProjectWidget::updateCurrentSession(int elapsedTime)
@@ -146,4 +145,16 @@ void ProjectWidget::askAndSetColor()
     }
     project->setProjectColorQSS(newColor);
     ui->line->setStyleSheet(project->getProjectColorQSS());
+}
+
+void ProjectWidget::askSessionData()
+{
+    AskSessionDataDialog* dialog = new AskSessionDataDialog(this->nativeParentWidget());
+    if (dialog->exec() == QDialog::Accepted) {
+        project->addCustomSessionFrom(dialog->startDateTimeEdit->dateTime(), dialog->endDateTimeEdit->dateTime());
+    }
+
+    delete dialog;
+
+    updateUI();
 }
