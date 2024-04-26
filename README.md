@@ -16,16 +16,16 @@ On Ubuntu (GNOME):
 🗹 Manual add session (also for testing purpose) <br/>
 
 <u>VERSION 0.X</u> <br/>
-☐ Manual delete session (and maybe better, thus dedicated UI for Sessions handling? see below)
-☐ Better UI for sessions handling (manual add, delete, etc.)
+☐ Manual delete session (and maybe better, thus dedicated UI for Sessions handling? see below) <br/>
+☐ Better UI for sessions handling (manual add, delete, etc.) <br/>
 ☐ Year active days and sessions count per day graph calendar (similar to GitHub/GitLab profiles) <br/>
 ☐ Stacked widgets to differentiate stats and edit (maybe needed after having the calendar)? <br/>
 ☐ Make project cards moveable (drag-and-drop) <br/>
 
 <u>VERSION 1.0</u> <br/>
-☐ Ensure basic tests
-☐ Ensure complete sessions uniqueness and reliability (input bugs, save bugs..)
-☐ Ensure project data reliability (input bugs, save bugs..)
+☐ Ensure basic tests <br/>
+☐ Ensure complete sessions uniqueness and reliability (input bugs, save bugs..) <br/>
+☐ Ensure project data reliability (input bugs, save bugs..) <br/>
 
 <u>TODO: LATER</u> <br/>
 ☐ Rethink the window size policy (is set fixed for now for simplicity) <br/>
