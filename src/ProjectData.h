@@ -22,7 +22,7 @@ public:
     void start();
     void stop();
     void deleteSaveFile();
-    void addSession(const Session& session);
+    bool addCustomSessionFrom(QDateTime& start, QDateTime& end);
     int getSessionsCount();
     QDateTime getCurrentSessionStartTime();
     quint64 getTotalDuration() const;                           // Calculate total duration of all sessions
