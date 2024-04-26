@@ -31,6 +31,8 @@ set(PROJECT_SOURCES
     src/Session.h
     src/utils.h
     src/utils.cpp
+    src/AskSessionDataDialog.cpp
+    src/AskSessionDataDialog.h
     #RESOURCES
     resources/Resources.qrc
 )

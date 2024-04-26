@@ -1,5 +1,6 @@
 #include "ProjectData.h"
 
+//static
 int ProjectData::currentProjectCount = 0;
 
 ProjectData::ProjectData(const QString& name) : projectName(name), ID(currentProjectCount)
@@ -35,9 +36,8 @@ void ProjectData::stop()
     }
 
     currentSession->end();
-    addSession(*currentSession);
+    sessions.push_back(*currentSession);
     currentSession = nullptr;
-    currentSessionID++;
 
     saveToFile();
 }
@@ -63,10 +63,17 @@ QString ProjectData::newProjectColorQSS()
     return QString("color: rgb(%1, %2, %3);").arg(red).arg(green).arg(blue);
 }
 
-void ProjectData::addSession(const Session& session)
+bool ProjectData::addCustomSessionFrom(QDateTime& start, QDateTime& end)
 {
-    qDebug() << "Adding a new session to " << projectName;
-    sessions.append(session);
+    if (!start.isValid() || !end.isValid())
+    {
+        return false;
+    }
+
+    Session s = Session(currentSessionID, start, end);
+    sessions.push_back(s);
+    saveToFile();
+    return true;
 }
 
 int ProjectData::getSessionsCount()
@@ -91,10 +98,7 @@ quint64 ProjectData::getTotalDuration() const
 QString ProjectData::getPrettyTotalDuration() const
 {
     quint64 seconds = getTotalDuration();
-    int hours = seconds / 3600;
-    int minutes = (seconds % 3600) / 60;
-
-    return QString("%1h %2m").arg(hours).arg(minutes, 2, 10, QChar('0'));
+    return Epochpp::secsToHM(seconds);
 }
 
 QString ProjectData::getAvgSessionDuration()
@@ -104,10 +108,8 @@ QString ProjectData::getAvgSessionDuration()
     {
         seconds = getTotalDuration() / getSessionsCount();
     }
-    int hours = seconds / 3600;
-    int minutes = (seconds % 3600) / 60;
-
-    return QString("%1h %2m").arg(hours).arg(minutes, 2, 10, QChar('0'));
+    
+    return Epochpp::secsToHM(seconds);
 }
 
 int ProjectData::getActiveDaysCount()
@@ -139,9 +141,8 @@ QString ProjectData::getAvgTimePerActiveDay()
     {
         avgSeconds = getTotalDuration() / getActiveDaysCount();
     }
-    int hours = avgSeconds / 3600;
-    int minutes = (avgSeconds % 3600) / 60;
-    return QString("%1h %2m").arg(hours).arg(minutes, 2, 10, QChar('0'));
+
+    return Epochpp::secsToHM(avgSeconds);
 }
 
 bool ProjectData::saveToFile()
@@ -167,7 +168,8 @@ bool ProjectData::saveToFile()
     qDebug() << "Serializing " << quint32(sessions.count()) << " sessions...";
 
     for (const Session& session : sessions)
-    { 
+    {
+        qDebug() << "Session " << session.getID() << " saved";
         session.serialize(out);
     }
 
@@ -192,8 +194,9 @@ bool ProjectData::loadFromFile(const QString& filePath)
     QDataStream in(&file);
     in.setVersion(QDataStream::Qt_DefaultCompiledVersion);
 
-    qDebug() << "Clearing sessions...";
-    sessions.clear();
+    // need better handling? or not at all?
+    //qDebug() << "Clearing sessions...";
+    //sessions.clear();
 
     in >> projectName;
 
@@ -202,8 +205,14 @@ bool ProjectData::loadFromFile(const QString& filePath)
     quint32 sessionCount;
     in >> sessionCount;
 
-    for (int i = 0; i < sessionCount; ++i) {
-        Session session(i);
+    if (currentSessionID != 0) {
+        qDebug() << "Resetting current session ID";
+        currentSessionID = 0;
+    }
+
+    // Session increment itself the int we're giving in order to keep track of the Session ID in a signel place
+    while (currentSessionID < sessionCount) {
+        Session session(currentSessionID);
         session.deserialize(in);
         sessions.append(session);
     }

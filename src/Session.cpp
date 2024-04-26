@@ -1,13 +1,18 @@
 #include "Session.h"
 
-Session::Session(const int ID) : ID(ID)
+Session::Session(int& ID) : ID(ID)
 {
 	startTime = QDateTime();
 	endTime = QDateTime();
+	qDebug() << "New empty Session created (" << ID << ")";
+	ID++;
 }
 
-Session::Session(const int ID, QDateTime start, QDateTime end) : ID(ID), startTime(start), endTime(end)
-{ }
+Session::Session(int& ID, QDateTime start, QDateTime end) : ID(ID), startTime(start), endTime(end)
+{ 
+	qDebug() << "New assigned Session created (" << ID << ")";
+	ID++;
+}
 
 void Session::start()
 {
@@ -42,6 +47,11 @@ quint64 Session::getDuration() const
 const QDateTime& Session::getStartDateTime() const
 {
 	return startTime;
+}
+
+const int& Session::getID() const
+{
+	return ID;
 }
 
 void Session::serialize(QDataStream& out) const {
