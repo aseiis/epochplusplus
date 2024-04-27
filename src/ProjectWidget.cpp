@@ -151,7 +151,9 @@ void ProjectWidget::askSessionData()
 {
     AskSessionDataDialog* dialog = new AskSessionDataDialog(this->nativeParentWidget());
     if (dialog->exec() == QDialog::Accepted) {
-        project->addCustomSessionFrom(dialog->startDateTimeEdit->dateTime(), dialog->endDateTimeEdit->dateTime());
+        QDateTime start = dialog->startDateTimeEdit->dateTime();
+        QDateTime end = dialog->endDateTimeEdit->dateTime();
+        project->addCustomSessionFrom(start, end);
     }
 
     delete dialog;
