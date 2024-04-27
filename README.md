@@ -14,6 +14,7 @@ On Ubuntu (GNOME):
 🗹 Use colors to distringuish projects and assign new custom one via dialog picker <br/>
 🗹 Display "Edit" and "Stats" features inside a collapsable panel <br/> 
 🗹 Manual add session (also for testing purpose) <br/>
+☐ Connect menu bar actions + finish to implement the necessary features for this (single file load, about menu) <br/>
 
 <u>VERSION 0.X</u> <br/>
 ☐ Manual delete session (and maybe better, thus dedicated UI for Sessions handling? see below) <br/>
