@@ -11,6 +11,8 @@ namespace Epochpp {
     inline const char* DEF_BIN_FILE_EXTENSION = "timesheet";
     inline const char* DEF_SAVE_LOCATION = "/saves/";
 
+    inline const char* CFG_FILE_PATH = "epochpp.cfg";
+
     // GLOBAL ACCESS //
 
     inline QMainWindow* g_mainWindow = nullptr;

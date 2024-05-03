@@ -11,12 +11,14 @@
 #include "Session.h"
 #include "utils.h"
 
-class ProjectData
+class ProjectData : public QObject
 {
+
+    Q_OBJECT
 // METHODS //
 
 public:
-    ProjectData(const QString& name);
+    ProjectData(const QString& name, const QString& filepath = "");
     ~ProjectData();
 
     void start();
@@ -32,8 +34,8 @@ public:
     QString getAvgTimePerActiveDay();
     bool saveToFile();
     QString getFilepath();
-    bool loadFromFile(const QString& filePath);
-    bool loadFromSave(const QString& projectName);
+    void setFilepath(QString& filepath);
+    bool loadFromFile(const QString& filepath);
     QString& getProjectName();
     void rename(const QString& newProjectName);
     QString getProjectColorQSS();
@@ -43,6 +45,10 @@ public:
 private:
     static QString newProjectColorQSS();
 
+signals:
+    void newOpenedFile(const QString& filepath);
+    void deletedFile(QString& filepath);
+
 // ATTRIBUTES //
 
 public:
@@ -50,6 +56,7 @@ public:
     static int currentProjectCount;
 
 private:
+    QString filepath;
     QString projectName;
     QString projectColorQSS;
     int currentSessionID;

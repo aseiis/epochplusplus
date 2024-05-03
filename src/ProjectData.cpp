@@ -3,7 +3,7 @@
 //static
 int ProjectData::currentProjectCount = 0;
 
-ProjectData::ProjectData(const QString& name) : projectName(name), ID(currentProjectCount)
+ProjectData::ProjectData(const QString& name, const QString& filepath) : projectName(name), filepath(filepath), ID(currentProjectCount)
 {
     currentSession = nullptr;
     currentSessionID = 0;
@@ -44,9 +44,12 @@ void ProjectData::stop()
 
 void ProjectData::deleteSaveFile()
 {
-    qDebug() << "Deleting file at " << getFilepath();
-    QFile f = QFile(getFilepath());
+    QString filepath = getFilepath();
+    qDebug() << "Deleting file at " << filepath;
+    QFile f = QFile(filepath);
     f.remove();
+
+    emit deletedFile(filepath);
 }
 
 bool ProjectData::isRunning()
@@ -147,12 +150,12 @@ QString ProjectData::getAvgTimePerActiveDay()
 
 bool ProjectData::saveToFile()
 {
-    QString filePath = getFilepath();
-    qDebug() << "Saving to file " << filePath;
-    QFile file(filePath);
+    QString filepath = getFilepath();
+    qDebug() << "Saving to file " << filepath;
+    QFile file(filepath);
     if (!file.open(QIODevice::WriteOnly))
     {
-        qDebug() << "ERROR: Couldn't save file at " << filePath << ". Error: " << file.errorString();
+        qDebug() << "ERROR: Couldn't save file at " << filepath << ". Error: " << file.errorString();
         return false;
     }
 
@@ -173,30 +176,56 @@ bool ProjectData::saveToFile()
         session.serialize(out);
     }
 
+    emit newOpenedFile(filepath);
+
     return true;
 }
 
 QString ProjectData::getFilepath()
 {
-    return QString(QDir::currentPath() + Epochpp::DEF_SAVE_LOCATION + projectName + "." + Epochpp::DEF_BIN_FILE_EXTENSION);
+    if (filepath == "")
+    {
+        qDebug() << "ERROR! No filepath registered for project " << projectName;
+        // setting default filepath
+        setFilepath(QString(QDir::currentPath() + Epochpp::DEF_SAVE_LOCATION + projectName + "." + Epochpp::DEF_BIN_FILE_EXTENSION));
+    } else if(!QFile::exists(filepath)) {
+        qDebug() << "ERROR! Couldn't reach registered path at " << filepath << " for "<< projectName;
+        // setting default filepath
+        setFilepath(QString(QDir::currentPath() + Epochpp::DEF_SAVE_LOCATION + projectName + "." + Epochpp::DEF_BIN_FILE_EXTENSION));
+    }
+    return filepath;
 }
 
-bool ProjectData::loadFromFile(const QString& filePath)
+void ProjectData::setFilepath(QString& filepath)
 {
-    qDebug() << "Loading from file " << filePath;
-    QFile file(filePath);
+    this->filepath = filepath;
+}
+
+bool ProjectData::loadFromFile(const QString& filepath)
+{
+    qDebug() << "Loading from file " << filepath;
+    QFile file(filepath);
     if (!file.open(QIODevice::ReadOnly))
     {
-        qDebug() << "ERROR: Couldn't open file at " << filePath << Qt::endl;
+        qDebug() << "ERROR: Couldn't open file at " << filepath << Qt::endl;
         return false;
     }
 
     QDataStream in(&file);
     in.setVersion(QDataStream::Qt_DefaultCompiledVersion);
 
-    // need better handling? or not at all?
-    //qDebug() << "Clearing sessions...";
-    //sessions.clear();
+    /*
+    in >> this->filepath;
+
+    if (this->filepath != filepath)
+    {
+        qDebug() << "ERROR: loaded filepath is different from the real filepath the file is being loaded from";
+        qDebug() << "current filepath: " << filepath;
+        qDebug() << "loaded filepath: " << this->filepath;
+        qDebug() << "overwriting filepath with current filepath";
+        this->filepath = filepath;
+    }
+    */
 
     in >> projectName;
 
@@ -205,7 +234,10 @@ bool ProjectData::loadFromFile(const QString& filePath)
     quint32 sessionCount;
     in >> sessionCount;
 
+    // wip?
     if (currentSessionID != 0) {
+        qDebug() << "Clearing sessions...";
+        sessions.clear();
         qDebug() << "Resetting current session ID";
         currentSessionID = 0;
     }
@@ -217,13 +249,9 @@ bool ProjectData::loadFromFile(const QString& filePath)
         sessions.append(session);
     }
 
-    return true;
-}
+    saveToFile();
 
-bool ProjectData::loadFromSave(const QString& projectName)
-{
-    QString path = QDir::currentPath() + Epochpp::DEF_SAVE_LOCATION + projectName;
-    return loadFromFile(path);
+    return true;
 }
 
 QString& ProjectData::getProjectName()
