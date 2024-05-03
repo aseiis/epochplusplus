@@ -2,6 +2,10 @@
 
 #include <QtWidgets/QMainWindow>
 #include <QInputDialog>
+#include <QFileDialog>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 #include <qmessagebox.h>
 
 #include "ProjectData.h"
@@ -25,11 +29,17 @@ public:
     ~TimeTrackingApp();
 
 private:
+    void initOpenedFiles();
     void initSavesDir();
-    void loadAndDisplayProjects();
-    void askNewProject();
+    void createConfigFile();
+    void loadFrom(QDir savesDir);
+    void loadAt(const QString filepath, bool trackingCheckEnabled=true);
+    void loadAllOpenedProjects();
+    void loadProjectsFromDefaultDirectory();
     void createProject(const QString& newProjectName = QString("__unnammed_project"));
+    void useProject(ProjectData* projectData);
     bool isProjectNameUnique(QString& testProjectName);
+    bool isProjectAlreadyTracked(const QString& filepath);
     void newProjectWidget(ProjectData* project);
     /*
     void refreshProjectsDisplay();
@@ -40,7 +50,15 @@ private:
 // SLOTS //
 
 public slots:
+    void askNewProject();
+    void loadSingleProject();
+    void loadAllProjectsFrom();
     void deleteProject(int projectID);
+    void trackProject(const QString& projectFilepath);
+    void untrackProject(const QString& filepath);
+    void displayAbout();
+    void displayHelp();
+    void displayReportBug();
 
 // SIGNALS //
 

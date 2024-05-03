@@ -3,13 +3,13 @@
 //static
 int ProjectData::currentProjectCount = 0;
 
-ProjectData::ProjectData(const QString& name) : projectName(name), ID(currentProjectCount)
+ProjectData::ProjectData(const QString& name, const QString& filepath) : m_projectName(name), m_filepath(filepath), m_ID(currentProjectCount)
 {
     currentSession = nullptr;
-    currentSessionID = 0;
-    sessions = QList<Session>();
+    m_currentSessionID = 0;
+    m_sessions = QList<Session>();
     currentProjectCount++;
-    projectColorQSS = newProjectColorQSS();
+    m_projectColorQSS = newProjectColorQSS();
 }
 
 ProjectData::~ProjectData()
@@ -24,7 +24,7 @@ void ProjectData::start()
         return;
     }
 
-    currentSession = new Session(currentSessionID);
+    currentSession = new Session(m_currentSessionID);
     currentSession->start();
 }
 
@@ -36,7 +36,7 @@ void ProjectData::stop()
     }
 
     currentSession->end();
-    sessions.push_back(*currentSession);
+    m_sessions.push_back(*currentSession);
     currentSession = nullptr;
 
     saveToFile();
@@ -44,9 +44,12 @@ void ProjectData::stop()
 
 void ProjectData::deleteSaveFile()
 {
-    qDebug() << "Deleting file at " << getFilepath();
-    QFile f = QFile(getFilepath());
+    QString filepath = getFilepath();
+    qDebug() << "Deleting file at " << filepath;
+    QFile f = QFile(filepath);
     f.remove();
+
+    emit signalDeletedFile(filepath);
 }
 
 bool ProjectData::isRunning()
@@ -70,15 +73,15 @@ bool ProjectData::addCustomSessionFrom(QDateTime& start, QDateTime& end)
         return false;
     }
 
-    Session s = Session(currentSessionID, start, end);
-    sessions.push_back(s);
+    Session s = Session(m_currentSessionID, start, end);
+    m_sessions.push_back(s);
     saveToFile();
     return true;
 }
 
 int ProjectData::getSessionsCount()
 {
-    return sessions.count();
+    return m_sessions.count();
 }
 
 QDateTime ProjectData::getCurrentSessionStartTime()
@@ -89,7 +92,7 @@ QDateTime ProjectData::getCurrentSessionStartTime()
 quint64 ProjectData::getTotalDuration() const
 {
     quint64 total = 0;
-    for (const Session& session : sessions) {
+    for (const Session& session : m_sessions) {
         total += session.getDuration();
     }
     return total;
@@ -114,15 +117,15 @@ QString ProjectData::getAvgSessionDuration()
 
 int ProjectData::getActiveDaysCount()
 {
-    if (sessions.isEmpty()) {
+    if (m_sessions.isEmpty()) {
         return 0;
     }
 
     int activeDays = 1;
 
-    QDate lastDay = sessions.first().getStartDateTime().date();
+    QDate lastDay = m_sessions.first().getStartDateTime().date();
 
-    for (Session& s : sessions)
+    for (Session& s : m_sessions)
     {
         QDate sDay = s.getStartDateTime().date();
         if (sDay != lastDay) {
@@ -147,27 +150,34 @@ QString ProjectData::getAvgTimePerActiveDay()
 
 bool ProjectData::saveToFile()
 {
-    QString filePath = getFilepath();
-    qDebug() << "Saving to file " << filePath;
-    QFile file(filePath);
-    if (!file.open(QIODevice::WriteOnly))
+    QString verifiedFilepath = getFilepath();
+    if (verifiedFilepath == "")
     {
-        qDebug() << "ERROR: Couldn't save file at " << filePath << ". Error: " << file.errorString();
+        qDebug() << "ERROR: Couldn't save file for project " << m_projectName << " : no filepath";
         return false;
     }
+    
+    QFile file(verifiedFilepath);
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        qDebug() << "ERROR: Couldn't save file at " << verifiedFilepath << ". Error: " << file.errorString();
+        return false;
+    }
+
+    qDebug() << "Saving to file " << verifiedFilepath;
 
     QDataStream out(&file);
     out.setVersion(QDataStream::Qt_DefaultCompiledVersion);
 
-    out << projectName;
+    out << m_projectName;
 
-    out << projectColorQSS;
+    out << m_projectColorQSS;
 
-    out << quint32(sessions.count());
+    out << quint32(m_sessions.count());
 
-    qDebug() << "Serializing " << quint32(sessions.count()) << " sessions...";
+    qDebug() << "Serializing " << quint32(m_sessions.count()) << " sessions...";
 
-    for (const Session& session : sessions)
+    for (const Session& session : m_sessions)
     {
         qDebug() << "Session " << session.getID() << " saved";
         session.serialize(out);
@@ -176,83 +186,103 @@ bool ProjectData::saveToFile()
     return true;
 }
 
-QString ProjectData::getFilepath()
+QString ProjectData::getFilepath(bool checkForExistantFile)
 {
-    return QString(QDir::currentPath() + Epochpp::DEF_SAVE_LOCATION + projectName + "." + Epochpp::DEF_BIN_FILE_EXTENSION);
+    if (m_filepath == "")
+        qDebug() << "ERROR! No filepath registered for project " << m_projectName;
+    
+    if (checkForExistantFile && !QFile::exists(m_filepath))
+        qDebug() << "WARNING! Project " << m_projectName << " save filepath point to a non-existant file: " << m_filepath;
+
+    return m_filepath;
 }
 
-bool ProjectData::loadFromFile(const QString& filePath)
+void ProjectData::setFilepath(QString& filepath)
 {
-    qDebug() << "Loading from file " << filePath;
-    QFile file(filePath);
+    m_filepath = filepath;
+    emit signalTrackFile(m_filepath);
+}
+
+bool ProjectData::loadFromFile(const QString& filepath)
+{
+    qDebug() << "Loading from file " << filepath;
+    QFile file(filepath);
     if (!file.open(QIODevice::ReadOnly))
     {
-        qDebug() << "ERROR: Couldn't open file at " << filePath << Qt::endl;
+        qDebug() << "ERROR: Couldn't open file at " << filepath << Qt::endl;
         return false;
     }
 
     QDataStream in(&file);
     in.setVersion(QDataStream::Qt_DefaultCompiledVersion);
 
-    // need better handling? or not at all?
-    //qDebug() << "Clearing sessions...";
-    //sessions.clear();
+    in >> m_projectName;
 
-    in >> projectName;
-
-    in >> projectColorQSS;
+    in >> m_projectColorQSS;
 
     quint32 sessionCount;
     in >> sessionCount;
 
-    if (currentSessionID != 0) {
+    // wip?
+    if (m_currentSessionID != 0) {
+        qDebug() << "Clearing sessions...";
+        m_sessions.clear();
         qDebug() << "Resetting current session ID";
-        currentSessionID = 0;
+        m_currentSessionID = 0;
     }
 
     // Session increment itself the int we're giving in order to keep track of the Session ID in a signel place
-    while (currentSessionID < sessionCount) {
-        Session session(currentSessionID);
+    while (m_currentSessionID < sessionCount) {
+        Session session(m_currentSessionID);
         session.deserialize(in);
-        sessions.append(session);
+        m_sessions.append(session);
     }
 
     return true;
 }
 
-bool ProjectData::loadFromSave(const QString& projectName)
-{
-    QString path = QDir::currentPath() + Epochpp::DEF_SAVE_LOCATION + projectName;
-    return loadFromFile(path);
-}
-
 QString& ProjectData::getProjectName()
 {
-    return projectName;
+    return m_projectName;
 }
 
 void ProjectData::rename(const QString& newProjectName)
 {
     if (newProjectName.isEmpty()) {
-        qDebug() << "WARNING: Tried to rename project (data level) but new project name is empty. Aborting" << Qt::endl;
+        qDebug() << "WARNING: Tried to rename project but new project name is empty. Aborting" << Qt::endl;
         return;
     }
 
     //delete soon-to-be-old file
-    deleteSaveFile();
+    deleteSaveFile(); // this fn also takes care of the signal emitting for untracking old project filepath
 
-    projectName = newProjectName;
+    QString oldProjectName = m_projectName;
+    m_projectName = newProjectName;
+    QString oldFilepath = getFilepath();
+    QString newFilepath;
+    if (oldFilepath == "")
+    {
+        qDebug() << "WARNING: Renamed a project without a registered filepath. Saving it at default path";
+        newFilepath = QString(QDir::currentPath() + Epochpp::DEF_SAVE_LOCATION + newProjectName + "." + Epochpp::DEF_BIN_FILE_EXTENSION);
+    }
+    else
+    {
+        QString end(oldProjectName + ".timesheet");
+        newFilepath = oldFilepath.remove(end, Qt::CaseInsensitive);
+        newFilepath += QString(m_projectName + ".timesheet");
+    }
 
+    setFilepath(newFilepath);
     saveToFile();
-}
+} 
 
 QString ProjectData::getProjectColorQSS()
 {
-    return this->projectColorQSS;
+    return m_projectColorQSS;
 }
 
 void ProjectData::setProjectColorQSS(QColor newColor)
 {
-    projectColorQSS = QString("color: rgb(%1, %2, %3)").arg(newColor.red()).arg(newColor.green()).arg(newColor.blue());
+    m_projectColorQSS = QString("color: rgb(%1, %2, %3)").arg(newColor.red()).arg(newColor.green()).arg(newColor.blue());
     saveToFile();
 }

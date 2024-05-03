@@ -4,29 +4,28 @@ TimeTrackingApp::TimeTrackingApp(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::TimeTrackingAppClass())
 {
-    initSavesDir();
-
+    // UI
+    // ===================================
     ui->setupUi(this);
 
     Epochpp::setMainWindow(this);
 
     this->setWindowTitle(Epochpp::APP_NAME);
 
-    //self UI connect
-
+    // Self UI connect
     connect(ui->newProjectPushButton, &QPushButton::pressed, this, &TimeTrackingApp::askNewProject);
     connect(ui->actionNew, &QAction::triggered, this, &TimeTrackingApp::askNewProject);
-
-    //TODO: test
-
+    connect(ui->actionLoad_Project, &QAction::triggered, this, &TimeTrackingApp::loadSingleProject);
+    connect(ui->actionLoad_All_Projects_From, &QAction::triggered, this, &TimeTrackingApp::loadAllProjectsFrom);
+    connect(ui->actionAbout, &QAction::triggered, this, &TimeTrackingApp::displayAbout);
+    connect(ui->actionHelp, &QAction::triggered, this, &TimeTrackingApp::displayHelp);
+    connect(ui->actionReport_a_Bug, &QAction::triggered, this, &TimeTrackingApp::displayReportBug);
 
     // UI Layout
 
     scrollAreaVBoxLayout = new QVBoxLayout(ui->projectsScrollAreaWidgetContents);
     scrollAreaVBoxLayout->setSpacing(10);
     ui->projectsScrollAreaWidgetContents->setLayout(scrollAreaVBoxLayout);
-
-    loadAndDisplayProjects();
     
     scrollAreaVBoxLayout->addSpacerItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
     
@@ -34,6 +33,12 @@ TimeTrackingApp::TimeTrackingApp(QWidget *parent)
     this->statusBar()->setSizeGripEnabled(false);
 
     configureStyleSheet();
+
+    // DATA
+    // ===================================
+    initSavesDir();
+    initOpenedFiles();
+    loadAllOpenedProjects();
 }
 
 TimeTrackingApp::~TimeTrackingApp()
@@ -52,6 +57,106 @@ TimeTrackingApp::~TimeTrackingApp()
     delete ui;
 }
 
+void TimeTrackingApp::initOpenedFiles()
+{
+    QFile file(Epochpp::CFG_FILE_PATH);
+
+    // Check if the file exists and has data
+    if (!file.exists() || file.size() < 0) {
+        qWarning() << "Config file not found. Creating a new one...";
+        createConfigFile();
+        return;
+    }
+
+    if (!file.open(QIODevice::ReadWrite)) {
+        qWarning() << "Failed to open config file in RW mode";
+        return;
+    }
+
+    QByteArray jsonData = file.readAll();
+    QJsonDocument doc = QJsonDocument::fromJson(jsonData);
+    if (doc.isNull() || !doc.isObject()) {
+        qWarning() << "ERROR! Config file is corrupted: can't parse. Aborting";
+        file.close();
+        return;
+    }
+
+    qDebug() << "Found config file. Loading filepaths of the files to open...";
+
+    QJsonObject obj = doc.object();
+    if (!obj.contains("openedFiles")) {
+        obj.insert("openedFiles", QJsonArray());
+        doc.setObject(obj);
+        file.seek(0);  // Rewind the file to the beginning
+        file.write(doc.toJson(QJsonDocument::Indented));
+    }
+
+    file.close();
+}
+
+// Helper method
+void TimeTrackingApp::createConfigFile()
+{
+    QFile file(Epochpp::CFG_FILE_PATH);
+
+    // File does not exist or is empty, create and initialize it
+    if (!file.open(QIODevice::WriteOnly)) {
+        qWarning() << "ERROR! Tried to write new config file because found none but failed to open new file for writing. Aborting";
+        return;
+    }
+
+    qWarning() << "Config file not found. Creating a new one...";
+    QJsonObject obj;
+    obj.insert("openedFiles", QJsonArray());
+    QJsonDocument doc(obj);
+    file.write(doc.toJson(QJsonDocument::Indented));
+    file.close();
+}
+
+void TimeTrackingApp::trackProject(const QString& projectFilepath)
+{
+    QFile file(Epochpp::CFG_FILE_PATH);
+
+    if (!file.open(QIODevice::ReadWrite)) {
+        qWarning() << "ERROR! When adding " << projectFilepath << " to openedFiles: failed to open config file in RW mode";
+        return;
+    }
+
+    QByteArray jsonData = file.readAll();
+    QJsonDocument doc = QJsonDocument::fromJson(jsonData);
+    if (doc.isNull() || !doc.isObject()) {
+        qWarning() << "ERROR! When adding " << projectFilepath << " to openedFiles: can't parse JSON data";
+        file.close();
+        return;
+    }
+
+    QJsonObject obj = doc.object();
+    QJsonArray openedFilesArray;
+
+    // Check if "openedFiles" key exists and is an array, otherwise create it
+    if (obj.contains("openedFiles") && obj["openedFiles"].isArray()) {
+        openedFilesArray = obj["openedFiles"].toArray();
+    }
+    else {
+        qWarning() << "WARNING! 'openedFiles' key did not exist in the config file. Creating it...";
+        obj.insert("openedFiles", QJsonArray());
+    }
+
+    // Append the new file path if it's not already in the array
+    if (!openedFilesArray.contains(projectFilepath)) {
+        openedFilesArray.append(projectFilepath);
+        obj["openedFiles"] = openedFilesArray;
+
+        // Update the JSON document with the new object
+        doc.setObject(obj);
+        file.seek(0);
+        file.write(doc.toJson(QJsonDocument::Indented));
+        file.resize(file.pos()); // Truncate any remaining data from previous content
+    }
+
+    file.close();
+}
+
 void TimeTrackingApp::initSavesDir()
 {
     QString savesDirPath = QDir::currentPath() + Epochpp::DEF_SAVE_LOCATION;
@@ -60,13 +165,96 @@ void TimeTrackingApp::initSavesDir()
         QDir dir;
         if (!dir.mkpath(savesDirPath))
         {
-            qDebug() << "ERROR: Couldn't create directory at " << savesDirPath << Qt::endl;
+            qWarning() << "ERROR: Couldn't create directory at " << savesDirPath << Qt::endl;
             return;
         }
     }
+    // necessary?
+    file.close();
 }
 
-void TimeTrackingApp::loadAndDisplayProjects()
+// private fn for loading and displaying projects inside a directory
+// not linked directly to an action
+void TimeTrackingApp::loadFrom(QDir savesDir)
+{
+    QString wildcardExt = "*." + QString(Epochpp::DEF_BIN_FILE_EXTENSION);
+    savesDir.setNameFilters(QStringList() << wildcardExt);
+    savesDir.setFilter(QDir::Files | QDir::NoDotAndDotDot);
+
+    QFileInfoList fileList = savesDir.entryInfoList();
+    for (const QFileInfo& fileInfo : fileList) {
+        QString filepath = fileInfo.absoluteFilePath();
+        loadAt(filepath);
+    }
+}
+
+// Private fn *responsible* for the loading of a project data + instantiate project widget
+// Not linked directly to an action
+void TimeTrackingApp::loadAt(const QString filepath, bool trackingCheckEnabled)
+{
+    // Check if project isn't already loaded
+    if (trackingCheckEnabled && isProjectAlreadyTracked(filepath)) {
+        qWarning() << "ERROR! Can't load project: " << filepath << " is already loaded";
+        return;
+    }
+
+    ProjectData* loadedProject = new ProjectData("Unnamed Loaded Project", filepath);
+    bool loadedSuccessfully = loadedProject->loadFromFile(filepath);
+    if (loadedSuccessfully)
+    {
+        useProject(loadedProject);
+    }
+    else
+    {
+        qDebug() << "Couldn't load project at " << filepath;
+        delete loadedProject;
+    }
+}
+
+// load all projects found in the config file ; used when launching the app
+void TimeTrackingApp::loadAllOpenedProjects()
+{
+    QFile file(Epochpp::CFG_FILE_PATH);
+
+    if (!file.open(QIODevice::ReadWrite)) {
+        qWarning() << "ERROR! Couldn't load projects from config file: failed to open config file in RW mode";
+        return;
+    }
+
+    QByteArray jsonData = file.readAll();
+    QJsonDocument doc = QJsonDocument::fromJson(jsonData);
+    if (doc.isNull() || !doc.isObject()) {
+        qWarning() << "ERROR! Couldn't load projects from config file: can't parse JSON data";
+        file.close();
+        return;
+    }
+
+    QJsonObject obj = doc.object();
+    QJsonArray openedFilesArray;
+
+    // Check if "openedFiles" key exists and is an array, otherwise abort process and load all projects from the default directory
+    if (!(obj.contains("openedFiles") && obj["openedFiles"].isArray()))
+    {
+        qWarning() << "ERROR! Couldn't load projects from config file: can't parse JSON data";
+        file.close();
+        return;
+    }
+
+    openedFilesArray = obj["openedFiles"].toArray();
+
+    for (int i = 0; i < openedFilesArray.size(); ++i) {
+        QJsonValue value = openedFilesArray.at(i);
+        QString filepath = value.toString();
+        loadAt(filepath, false);
+    }
+
+    file.close();
+}
+
+// LECAGY
+// private fn for loading and displaying projects located in the default directory where .timesheet are saved
+// not linked to an action
+void TimeTrackingApp::loadProjectsFromDefaultDirectory()
 {
     QDir savesDir = QDir::currentPath() + Epochpp::DEF_SAVE_LOCATION;
     if (!savesDir.exists()) {
@@ -74,22 +262,44 @@ void TimeTrackingApp::loadAndDisplayProjects()
         return;
     }
 
-    QString wildcardExt = "*." + QString(Epochpp::DEF_BIN_FILE_EXTENSION);
-    savesDir.setNameFilters(QStringList() << wildcardExt);
-    savesDir.setFilter(QDir::Files | QDir::NoDotAndDotDot);
+    loadFrom(savesDir);
+}
 
-    QFileInfoList fileList = savesDir.entryInfoList();
-    for(const QFileInfo & fileInfo : fileList) {
-        QString filePath = fileInfo.absoluteFilePath();
-        ProjectData* loadedProject = new ProjectData("Unnamed Loaded Project");
-        loadedProject->loadFromFile(filePath);
-        projects.push_back(loadedProject);
-    }
+// for action "actionLoad_All_Projects_From" (menuBar)
+void TimeTrackingApp::loadAllProjectsFrom()
+{
+    // WIP!!!
+    // -> ADD THE DIRECTORY WHERE THE PROJECTS WERE ORIGINALLY SAVED TO A LIST OF DIRECTORIES TO LOAD FROM
 
-    for (ProjectData* p : projects)
+    QString inputPath = QFileDialog::getExistingDirectory(nullptr, QObject::tr("Select Directory"),
+        QDir::homePath(),
+        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+    if (inputPath.isEmpty())
     {
-        newProjectWidget(p);
+        qWarning() << "Can't load projects from " << inputPath;
+        return;
     }
+
+    QDir savesDir(inputPath);
+    
+    loadFrom(savesDir);
+}
+
+// for action "actionLoad" (menuBar)
+void TimeTrackingApp::loadSingleProject()
+{
+    QString fileName = QFileDialog::getOpenFileName(this,
+        tr("Load Project"), "",
+        tr("timesheet (*.timesheet, *.TIMESHEET)"));
+
+    if (fileName.isEmpty())
+    {
+        qWarning() << "Can't load project at " << fileName;
+        return;
+    }
+
+    loadAt(fileName);
 }
 
 void TimeTrackingApp::askNewProject()
@@ -113,11 +323,23 @@ void TimeTrackingApp::askNewProject()
     }
 }
 
+// Create a new project from a project name
 void TimeTrackingApp::createProject(const QString &newProjectName)
 {
-    ProjectData* newProject = new ProjectData(newProjectName);
-    projects.push_back(newProject);
-    newProjectWidget(newProject);
+    QString newProjectFilepath = QString(QDir::currentPath() + Epochpp::DEF_SAVE_LOCATION + newProjectName + "." + Epochpp::DEF_BIN_FILE_EXTENSION);
+    ProjectData* newProject = new ProjectData(newProjectName, newProjectFilepath);
+    useProject(newProject);
+    newProject->saveToFile();
+}
+
+// Track and set up project from ProjectData
+void TimeTrackingApp::useProject(ProjectData* projectData)
+{
+    projectData->connect(projectData, &ProjectData::signalTrackFile, this, &TimeTrackingApp::trackProject);
+    projectData->connect(projectData, &ProjectData::signalDeletedFile, this, &TimeTrackingApp::untrackProject);
+    projects.push_back(projectData);
+    trackProject(projectData->getFilepath());
+    newProjectWidget(projectData);
 }
 
 bool TimeTrackingApp::isProjectNameUnique(QString& testProjectName)
@@ -132,6 +354,52 @@ bool TimeTrackingApp::isProjectNameUnique(QString& testProjectName)
     return true;
 }
 
+bool TimeTrackingApp::isProjectAlreadyTracked(const QString& filepath)
+{
+    QFile file(Epochpp::CFG_FILE_PATH);
+
+    if (!file.open(QIODevice::ReadWrite)) {
+        qDebug() << "Failed to open config file in RW mode";
+        return false;
+    }
+
+    QByteArray jsonData = file.readAll();
+    QJsonDocument doc = QJsonDocument::fromJson(jsonData);
+    if (doc.isNull() || !doc.isObject()) {
+        qDebug() << "Config file is corrupted: can't parse";
+        file.close();
+        return false;
+    }
+
+    QJsonObject obj = doc.object();
+    QJsonArray openedFilesArray;
+
+    // Check if "openedFiles" key exists and is an array, otherwise abort process and return false
+    if (!(obj.contains("openedFiles") && obj["openedFiles"].isArray())) {
+        qDebug() << "ERROR! Couldn't read openedFiles JSON data";
+        file.close();
+        return false;
+    }
+
+    openedFilesArray = obj["openedFiles"].toArray();
+
+    for (int i = 0; i < openedFilesArray.size(); ++i) {
+        QJsonValue value = openedFilesArray.at(i);
+        if (value.isString()) {
+            QString i_filepath = value.toString();
+
+            if (i_filepath == filepath) {
+                qDebug() << "ERROR! Project is already tracked:" << filepath;
+                file.close();
+                return true;
+            }
+        }
+    }
+
+    file.close();
+    return false;
+}
+
 void TimeTrackingApp::newProjectWidget(ProjectData* project)
 {
     ProjectWidget* newProjectVm = new ProjectWidget(this, project);
@@ -143,7 +411,7 @@ void TimeTrackingApp::newProjectWidget(ProjectData* project)
 void TimeTrackingApp::deleteProject(int projectID)
 {
     auto widgetIt = std::find_if(projectsVm.begin(), projectsVm.end(), [projectID](ProjectWidget* widget) {
-        return widget->project->ID == projectID;
+        return widget->project->m_ID == projectID;
     });
     if (widgetIt != projectsVm.end()) {
         ProjectWidget* widget = *widgetIt;
@@ -156,18 +424,69 @@ void TimeTrackingApp::deleteProject(int projectID)
                                       QString("Couldn't delete project"),
                                       QMessageBox::Ok,
                                       QMessageBox::Ok,
-                                      "Error");
+                                      "Error!");
         return;
     }
 
     auto it = std::find_if(projects.begin(), projects.end(), [projectID](ProjectData* project) {
-        return project->ID == projectID;
+        return project->m_ID == projectID;
     });
     if (it != projects.end()) {
         (*it)->deleteSaveFile();
         delete *it;
         projects.erase(it);
     }
+}
+
+// TODO: write better debug messages + msgbox
+void TimeTrackingApp::untrackProject(const QString& filepath)
+{
+    QFile file(Epochpp::CFG_FILE_PATH);
+
+    if (!file.open(QIODevice::ReadWrite)) {
+        qWarning() << "ERROR! Tried ro untrack project but couldn't open config file in RW mode";
+        return;
+    }
+
+    QByteArray jsonData = file.readAll();
+    QJsonDocument doc = QJsonDocument::fromJson(jsonData);
+    if (doc.isNull() || !doc.isObject()) {
+        qWarning() << "ERROR! Tried ro untrack project but couldn't parse JSON data";
+        file.close();
+        return;
+    }
+
+    QJsonObject obj = doc.object();
+    QJsonArray openedFilesArray = obj["openedFiles"].toArray();
+
+    QJsonArray newOpenedFilesArray;
+    bool found = false;
+    for (int i = 0; i < openedFilesArray.size(); ++i) {
+        QJsonValue value = openedFilesArray.at(i);
+        if (value.isString() && value.toString() != filepath) {
+            newOpenedFilesArray.append(value);
+        }
+        else {
+            found = true;
+            qDebug() << "Found filepath of untracked project in the config file. Deleting it...";
+        }
+    }
+
+    if (!found) {
+        qWarning() << "File path not found in the tracking list:" << filepath;
+        file.close();
+        return;
+    }
+
+    // Update the JSON object with the new array
+    obj["openedFiles"] = newOpenedFilesArray;
+
+    // Rewrite the modified JSON back to the file
+    file.resize(0); // Truncate the file first to ensure clean write
+    QJsonDocument newDoc(obj);
+    file.write(newDoc.toJson());
+    file.close();
+    qDebug() << filepath << " no longer tracked";
 }
 
 /*
@@ -192,7 +511,7 @@ void TimeTrackingApp::configureStyleSheet()
     QFile styleSheetFile(":/qss/default-style.qss");
     if (!styleSheetFile.open(QFile::ReadOnly))
     {
-        qDebug() << "Couldn't open QSS file" <<  Qt::endl;
+        qWarning() << "Couldn't open QSS file" <<  Qt::endl;
         return;
     }
 
@@ -200,4 +519,59 @@ void TimeTrackingApp::configureStyleSheet()
     styleSheetFile.close();
 
     setStyleSheet(mainStyleSheet);
+}
+
+void TimeTrackingApp::displayAbout()
+{
+    QMessageBox aboutBox;
+    aboutBox.setWindowTitle("About Epoch++");
+    aboutBox.setText(
+        "<p>Epoch++ is a free, open-source software licensed under GPL3, developed using the Qt framework</p>"
+        "<p>Epoch++ aims to help you easily and locally track your progress on projects and hobbies.</p>"
+        "<p>Bug? Missing feature? Want to improve the software or report something?</p>"
+        "<p>You can contribute on the GitHub page where the project is hosted: "
+        "</br><a href='https://github.com/aseiis/epochplusplus'>https://github.com/aseiis/epochplusplus</a></p>"
+        );
+
+    aboutBox.setTextFormat(Qt::RichText);
+    aboutBox.setStandardButtons(QMessageBox::Ok);
+
+    aboutBox.exec();
+}
+
+void TimeTrackingApp::displayHelp()
+{
+    QMessageBox helpBox;
+    helpBox.setWindowTitle("Help");
+    helpBox.setText(
+        "<h3>How to use Epoch++?</h3>"
+        "<p>Epoch++ let you create new projects and track the time you've spent on them.</p>"
+        "<p>To create your first project, click on the 'New Project' button."
+        "Now your project has been created: you can see the project card displaying basic information about it: the time you spent on the current session, "
+        "when a session is running, as well as the total time spent on that project</p>"
+        "<p>You can now start the first session of your project by pressing the play button. It'll start a session that you can stop at any time.</p>"
+        "<p>During the session, its duration is displayed on the project card. "
+        "After you've stopped your session, the data of this session will be added to the project statistics.</p>"
+        "<p>To see more informations and statistics about a specific project, click on the 'More...' button</p>"
+    );
+
+    helpBox.setTextFormat(Qt::RichText);
+    helpBox.setStandardButtons(QMessageBox::Ok);
+
+    helpBox.exec();
+}
+
+void TimeTrackingApp::displayReportBug()
+{
+    QMessageBox reportBugBox;
+    reportBugBox.setWindowTitle("Report a bug");
+    reportBugBox.setText(
+        "<p>If you witnessed a bug or have any suggestion about the software, you can open an issue on the GitHub page where Epoch++ is hosted:</p>"
+        "<p><a href='https://github.com/aseiis/epochplusplus'>https://github.com/aseiis/epochplusplus</a></p>"
+    );
+
+    reportBugBox.setTextFormat(Qt::RichText);
+    reportBugBox.setStandardButtons(QMessageBox::Ok);
+
+    reportBugBox.exec();
 }

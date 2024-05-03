@@ -117,7 +117,7 @@ void ProjectWidget::rename(const QString& newProjectName)
 void ProjectWidget::askDelete()
 {
     int res = MsgBoxGen::throwNewMessageBox(Epochpp::g_mainWindow,
-                            QString("Are you sure you want to delete \"%1\" project?").arg(project->getProjectName()),
+                            QString("Are you sure you want to delete \"%1\" project?\nThe .timesheet file will also be deleted").arg(project->getProjectName()),
                             QMessageBox::Ok | QMessageBox::Cancel,
                             QMessageBox::Cancel,
                             "Project Delete")->exec();
@@ -128,7 +128,7 @@ void ProjectWidget::askDelete()
 
 void ProjectWidget::immediateDelete()
 {
-    emit requestProjectDeletion(project->ID);
+    emit requestProjectDeletion(project->m_ID);
     //bool deletionSuccessful = ...;
     //if(deletionSuccessful)
     // ... REMOVE WIDGET
