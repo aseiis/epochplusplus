@@ -15,7 +15,7 @@ TimeTrackingApp::TimeTrackingApp(QWidget *parent)
     // self UI connect
     connect(ui->newProjectPushButton, &QPushButton::pressed, this, &TimeTrackingApp::askNewProject);
     connect(ui->actionNew, &QAction::triggered, this, &TimeTrackingApp::askNewProject);
-    connect(ui->actionLoad, &QAction::triggered, this, &TimeTrackingApp::loadSingleProject);
+    connect(ui->actionLoad_Project, &QAction::triggered, this, &TimeTrackingApp::loadSingleProject);
     connect(ui->actionLoad_All_Projects_From, &QAction::triggered, this, &TimeTrackingApp::loadAllProjectsFrom);
 
     // UI Layout
@@ -275,7 +275,7 @@ void TimeTrackingApp::loadAllProjectsFrom()
 void TimeTrackingApp::loadSingleProject()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Load project"), "",
+        tr("Load Project"), "",
         tr("TIMESHEET (*.timesheet, *.TIMESHEET)"));
 
     if (fileName.isEmpty())

@@ -165,16 +165,19 @@
      <string>File</string>
     </property>
     <addaction name="actionNew"/>
-    <addaction name="actionLoad"/>
+    <addaction name="actionLoad_Project"/>
     <addaction name="actionLoad_All_Projects_From"/>
    </widget>
-   <widget class="QMenu" name="menuAbout">
+   <widget class="QMenu" name="menuEdit">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="title">
      <string>Edit</string>
     </property>
-    <addaction name="actionEpoch"/>
+    <addaction name="actionCurrent_Project_Details"/>
    </widget>
-   <widget class="QMenu" name="menu">
+   <widget class="QMenu" name="menuMisc">
     <property name="title">
      <string>?</string>
     </property>
@@ -182,17 +185,17 @@
     <addaction name="actionHelp"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuAbout"/>
-   <addaction name="menu"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuMisc"/>
   </widget>
   <action name="actionNew">
    <property name="text">
     <string>New</string>
    </property>
   </action>
-  <action name="actionLoad">
+  <action name="actionLoad_Project">
    <property name="text">
-    <string>Load...</string>
+    <string>Load Project...</string>
    </property>
   </action>
   <action name="actionLoad_All_Projects_From">
@@ -200,7 +203,7 @@
     <string>Load All Projects From...</string>
    </property>
   </action>
-  <action name="actionEpoch">
+  <action name="actionCurrent_Project_Details">
    <property name="text">
     <string>Current project details...</string>
    </property>

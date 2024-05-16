@@ -35,9 +35,6 @@ private:
     void loadAt(const QString filepath, bool trackingCheckEnabled=true);
     void loadAllOpenedProjects();
     void loadProjectsFromDefaultDirectory();
-    void loadAllProjectsFrom();
-    void loadSingleProject();
-    void askNewProject();
     void createProject(const QString& newProjectName = QString("__unnammed_project"));
     bool isProjectNameUnique(QString& testProjectName);
     bool isProjectAlreadyTracked(const QString& filepath);
@@ -51,6 +48,9 @@ private:
 // SLOTS //
 
 public slots:
+    void askNewProject();
+    void loadSingleProject();
+    void loadAllProjectsFrom();
     void deleteProject(int projectID);
     void untrackProject(const QString& filepath);
     void addToOpenedFiles(const QString& projectFilepath);
