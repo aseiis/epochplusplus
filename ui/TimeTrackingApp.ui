@@ -183,6 +183,7 @@
     </property>
     <addaction name="actionAbout"/>
     <addaction name="actionHelp"/>
+    <addaction name="actionReport_a_Bug"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -205,7 +206,7 @@
   </action>
   <action name="actionCurrent_Project_Details">
    <property name="text">
-    <string>Current project details...</string>
+    <string>Current project details</string>
    </property>
   </action>
   <action name="actionAbout">
@@ -216,6 +217,11 @@
   <action name="actionHelp">
    <property name="text">
     <string>Help</string>
+   </property>
+  </action>
+  <action name="actionReport_a_Bug">
+   <property name="text">
+    <string>Report a Bug</string>
    </property>
   </action>
  </widget>

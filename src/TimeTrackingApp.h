@@ -54,6 +54,9 @@ public slots:
     void deleteProject(int projectID);
     void untrackProject(const QString& filepath);
     void addToOpenedFiles(const QString& projectFilepath);
+    void displayAbout();
+    void displayHelp();
+    void displayReportBug();
 
 // SIGNALS //
 

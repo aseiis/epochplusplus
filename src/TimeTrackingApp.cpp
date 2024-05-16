@@ -17,6 +17,9 @@ TimeTrackingApp::TimeTrackingApp(QWidget *parent)
     connect(ui->actionNew, &QAction::triggered, this, &TimeTrackingApp::askNewProject);
     connect(ui->actionLoad_Project, &QAction::triggered, this, &TimeTrackingApp::loadSingleProject);
     connect(ui->actionLoad_All_Projects_From, &QAction::triggered, this, &TimeTrackingApp::loadAllProjectsFrom);
+    connect(ui->actionAbout, &QAction::triggered, this, &TimeTrackingApp::displayAbout);
+    connect(ui->actionHelp, &QAction::triggered, this, &TimeTrackingApp::displayHelp);
+    connect(ui->actionReport_a_Bug, &QAction::triggered, this, &TimeTrackingApp::displayReportBug);
 
     // UI Layout
 
@@ -492,4 +495,59 @@ void TimeTrackingApp::configureStyleSheet()
     styleSheetFile.close();
 
     setStyleSheet(mainStyleSheet);
+}
+
+void TimeTrackingApp::displayAbout()
+{
+    QMessageBox aboutBox;
+    aboutBox.setWindowTitle("About Epoch++");
+    aboutBox.setText(
+        "<p>Epoch++ is a free, open-source software licensed under GPL3, developed using the Qt framework</p>"
+        "<p>Epoch++ aims to help you easily and locally track your progress on projects and hobbies.</p>"
+        "<p>Bug? Missing feature? Want to improve the software or report something?</p>"
+        "<p>You can contribute on the GitHub page where the project is hosted: "
+        "</br><a href='https://github.com/aseiis/epochplusplus'>https://github.com/aseiis/epochplusplus</a></p>"
+        );
+
+    aboutBox.setTextFormat(Qt::RichText);
+    aboutBox.setStandardButtons(QMessageBox::Ok);
+
+    aboutBox.exec();
+}
+
+void TimeTrackingApp::displayHelp()
+{
+    QMessageBox helpBox;
+    helpBox.setWindowTitle("Help");
+    helpBox.setText(
+        "<h3>How to use Epoch++?</h3>"
+        "<p>Epoch++ let you create new projects and track the time you've spent on them.</p>"
+        "<p>To create your first project, click on the 'New Project' button."
+        "Now your project has been created: you can see the project card displaying basic information about it: the time you spent on the current session, "
+        "when a session is running, as well as the total time spent on that project</p>"
+        "<p>You can now start the first session of your project by pressing the play button. It'll start a session that you can stop at any time.</p>"
+        "<p>During the session, its duration is displayed on the project card. "
+        "After you've stopped your session, the data of this session will be added to the project statistics.</p>"
+        "<p>To see more informations and statistics about a specific project, click on the 'More...' button</p>"
+    );
+
+    helpBox.setTextFormat(Qt::RichText);
+    helpBox.setStandardButtons(QMessageBox::Ok);
+
+    helpBox.exec();
+}
+
+void TimeTrackingApp::displayReportBug()
+{
+    QMessageBox reportBugBox;
+    reportBugBox.setWindowTitle("Report a bug");
+    reportBugBox.setText(
+        "<p>If you witnessed a bug or have any suggestion about the software, you can open an issue on the GitHub page where Epoch++ is hosted:</p>"
+        "<p><a href='https://github.com/aseiis/epochplusplus'>https://github.com/aseiis/epochplusplus</a></p>"
+    );
+
+    reportBugBox.setTextFormat(Qt::RichText);
+    reportBugBox.setStandardButtons(QMessageBox::Ok);
+
+    reportBugBox.exec();
 }

@@ -35,7 +35,7 @@ QString Epochpp::secsToHM(quint64 totalSeconds)
 
 QMessageBox* MsgBoxGen::throwNewMessageBox(QMainWindow* mainWindow, QString text, QFlags<QMessageBox::StandardButton> buttons, QMessageBox::StandardButton defaultButton, QString windowTitle)
 {
-    QMessageBox* msgBox = new QMessageBox(mainWindow->centralWidget());
+    QMessageBox* msgBox = new QMessageBox(mainWindow);
 
     if (windowTitle == "")
         msgBox->setWindowTitle(Epochpp::APP_NAME);
