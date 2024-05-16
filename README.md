@@ -9,12 +9,12 @@ On Ubuntu (GNOME):
 <u>VERSION 0.1</u> <br/>
 🗹 Create projects, save and load them from disk <br/>
 🗹 Edit project : rename, delete <br/>
-🗹 Start and stop session, added automatically to project <br/>
-🗹 Display project stats by processing sessions data <br/>
-🗹 Use colors to distringuish projects and assign new custom one via dialog picker <br/>
+🗹 Dynamic project loading (default directory for saves + file loading if saved elsewhere) <br/>
+🗹 Start and stop session, added automatically to project stats <br/>
+🗹 Display various project stats by processing sessions data (next: calendar, see below 0.X) <br/>
+🗹 Use customizable colors to distinguish projects <br/>
 🗹 Display "Edit" and "Stats" features inside a collapsable panel <br/> 
 🗹 Manual add session (also for testing purpose) <br/>
-🗹 Connect menu bar actions + finish to implement the necessary features for this (single file load, about etc. menu) <br/>
 ☐ JSON support <br/>
 
 <u>VERSION 0.X</u> <br/>
