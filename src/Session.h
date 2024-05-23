@@ -22,8 +22,8 @@ public:
 // ATTRIBUTES //
 
 private:
-    QDateTime startTime;
-    QDateTime endTime;
-    int ID;
+    QDateTime m_startTime;
+    QDateTime m_endTime;
+    int m_ID;
 };
 

@@ -1,4 +1,4 @@
-A minimal, cross-platform Time Tracking App made with C++ & Qt
+A minimal, cross-platform Time Tracking App (C++/Qt)
 
 On Ubuntu (GNOME):
 ![A screenshot of the main page of the app on Ubuntu (GNOME)](tta-main-gnome-screenshot.png)
@@ -31,7 +31,7 @@ On Ubuntu (GNOME):
 
 <u>TODO: LATER</u> <br/>
 ☐ Rethink the window size policy (is set fixed for now for simplicity) <br/>
-☐ More flexibily with save files (edit save file location by user?) <br/>
+☐ Project categories? <br/>
 
 ## Building and compatibility
 
@@ -42,4 +42,9 @@ Developed on Linux (Ubuntu) with QtCreator and Windows with VS2022 (Qt plugin an
 Tested on Linux Ubuntu and Windows 10.
 
 #### Note
-Qt projects built with CMake might have build issues related to the moc pipepline (the include of to-be-generated Qt' ui files). If so, you'll find the ui_*.h files in your /out/build directory that is generated at every CMake launch. This issue is especially happening on Windows, if you're using Visual Studio you might need to either : ***Reconfigure your project using CMake*** (and clean build) or ***clean the project (also possible to delete the build directory) and restart VS as it will trigger the necessay CMake rebuilding.***
+Qt projects built with CMake might have build issues related to the moc pipepline (the include of to-be-generated Qt' ui files). 
+If so, you'll find the ui_*.h files in your /out/build directory that is generated at every CMake launch. 
+This issue is especially happening on Windows, if you're using Visual Studio you might need to either : 
+***Reconfigure your project using CMake*** (and clean build) 
+or 
+***Clean the project (also possible to delete the build directory) and restart VS as it will trigger the necessay CMake rebuilding.***

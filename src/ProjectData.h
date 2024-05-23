@@ -18,7 +18,7 @@ class ProjectData : public QObject
 // METHODS //
 
 public:
-    ProjectData(const QString& name, const QString& filepath = "");
+    ProjectData(const QString& name, const QString& filepath);
     ~ProjectData();
 
     void start();
@@ -33,7 +33,7 @@ public:
     int getActiveDaysCount();
     QString getAvgTimePerActiveDay();
     bool saveToFile();
-    QString getFilepath();
+    QString getFilepath(bool checkForExistantFile = true);
     void setFilepath(QString& filepath);
     bool loadFromFile(const QString& filepath);
     QString& getProjectName();
@@ -46,21 +46,21 @@ private:
     static QString newProjectColorQSS();
 
 signals:
-    void newOpenedFile(const QString& filepath);
-    void deletedFile(QString& filepath);
+    void signalTrackFile(QString& filepath);
+    void signalDeletedFile(QString& filepath);
 
 // ATTRIBUTES //
 
 public:
-    int ID;
+    int m_ID;
     static int currentProjectCount;
 
 private:
-    QString filepath;
-    QString projectName;
-    QString projectColorQSS;
-    int currentSessionID;
+    QString m_filepath;
+    QString m_projectName;
+    QString m_projectColorQSS;
+    int m_currentSessionID;
     Session* currentSession = nullptr;
-    QList<Session> sessions;
+    QList<Session> m_sessions;
 };
 

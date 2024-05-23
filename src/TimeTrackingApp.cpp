@@ -12,7 +12,7 @@ TimeTrackingApp::TimeTrackingApp(QWidget *parent)
 
     this->setWindowTitle(Epochpp::APP_NAME);
 
-    // self UI connect
+    // Self UI connect
     connect(ui->newProjectPushButton, &QPushButton::pressed, this, &TimeTrackingApp::askNewProject);
     connect(ui->actionNew, &QAction::triggered, this, &TimeTrackingApp::askNewProject);
     connect(ui->actionLoad_Project, &QAction::triggered, this, &TimeTrackingApp::loadSingleProject);
@@ -62,56 +62,70 @@ void TimeTrackingApp::initOpenedFiles()
     QFile file(Epochpp::CFG_FILE_PATH);
 
     // Check if the file exists and has data
-    if (file.exists() && file.size() > 0) {
-        if (!file.open(QIODevice::ReadWrite)) {
-            qDebug() << "Failed to open config file in RW mode";
-            return;
-        }
-
-        QByteArray jsonData = file.readAll();
-        QJsonDocument doc = QJsonDocument::fromJson(jsonData);
-        if (doc.isNull() || !doc.isObject()) {
-            qDebug() << "Config file is corrupted: can't parse";
-            file.close();
-            return;
-        }
-
-        QJsonObject obj = doc.object();
-        if (!obj.contains("openedFiles")) {
-            obj.insert("openedFiles", QJsonArray());
-            doc.setObject(obj);
-            file.seek(0);  // Rewind the file to the beginning
-            file.write(doc.toJson(QJsonDocument::Indented));
-        }
+    if (!file.exists() || file.size() < 0) {
+        qWarning() << "Config file not found. Creating a new one...";
+        createConfigFile();
+        return;
     }
-    else {
-        // File does not exist or is empty, create and initialize it
-        if (!file.open(QIODevice::WriteOnly)) {
-            qDebug() << "Failed to open new file for writing.";
-            return;
-        }
-        QJsonObject obj;
-        obj.insert("openedFiles", QJsonArray());
-        QJsonDocument doc(obj);
-        file.write(doc.toJson(QJsonDocument::Indented));
-    }
-
-    file.close();
-}
-
-void TimeTrackingApp::addToOpenedFiles(const QString& projectFilepath)
-{
-    QFile file(Epochpp::CFG_FILE_PATH);
 
     if (!file.open(QIODevice::ReadWrite)) {
-        qDebug() << "Failed to open config file in RW mode";
+        qWarning() << "Failed to open config file in RW mode";
         return;
     }
 
     QByteArray jsonData = file.readAll();
     QJsonDocument doc = QJsonDocument::fromJson(jsonData);
     if (doc.isNull() || !doc.isObject()) {
-        qDebug() << "Config file is corrupted: can't parse";
+        qWarning() << "ERROR! Config file is corrupted: can't parse. Aborting";
+        file.close();
+        return;
+    }
+
+    qDebug() << "Found config file. Loading filepaths of the files to open...";
+
+    QJsonObject obj = doc.object();
+    if (!obj.contains("openedFiles")) {
+        obj.insert("openedFiles", QJsonArray());
+        doc.setObject(obj);
+        file.seek(0);  // Rewind the file to the beginning
+        file.write(doc.toJson(QJsonDocument::Indented));
+    }
+
+    file.close();
+}
+
+// Helper method
+void TimeTrackingApp::createConfigFile()
+{
+    QFile file(Epochpp::CFG_FILE_PATH);
+
+    // File does not exist or is empty, create and initialize it
+    if (!file.open(QIODevice::WriteOnly)) {
+        qWarning() << "ERROR! Tried to write new config file because found none but failed to open new file for writing. Aborting";
+        return;
+    }
+
+    qWarning() << "Config file not found. Creating a new one...";
+    QJsonObject obj;
+    obj.insert("openedFiles", QJsonArray());
+    QJsonDocument doc(obj);
+    file.write(doc.toJson(QJsonDocument::Indented));
+    file.close();
+}
+
+void TimeTrackingApp::trackProject(const QString& projectFilepath)
+{
+    QFile file(Epochpp::CFG_FILE_PATH);
+
+    if (!file.open(QIODevice::ReadWrite)) {
+        qWarning() << "ERROR! When adding " << projectFilepath << " to openedFiles: failed to open config file in RW mode";
+        return;
+    }
+
+    QByteArray jsonData = file.readAll();
+    QJsonDocument doc = QJsonDocument::fromJson(jsonData);
+    if (doc.isNull() || !doc.isObject()) {
+        qWarning() << "ERROR! When adding " << projectFilepath << " to openedFiles: can't parse JSON data";
         file.close();
         return;
     }
@@ -124,6 +138,7 @@ void TimeTrackingApp::addToOpenedFiles(const QString& projectFilepath)
         openedFilesArray = obj["openedFiles"].toArray();
     }
     else {
+        qWarning() << "WARNING! 'openedFiles' key did not exist in the config file. Creating it...";
         obj.insert("openedFiles", QJsonArray());
     }
 
@@ -134,7 +149,7 @@ void TimeTrackingApp::addToOpenedFiles(const QString& projectFilepath)
 
         // Update the JSON document with the new object
         doc.setObject(obj);
-        file.seek(0); // Go back to the start of the file
+        file.seek(0);
         file.write(doc.toJson(QJsonDocument::Indented));
         file.resize(file.pos()); // Truncate any remaining data from previous content
     }
@@ -150,7 +165,7 @@ void TimeTrackingApp::initSavesDir()
         QDir dir;
         if (!dir.mkpath(savesDirPath))
         {
-            qDebug() << "ERROR: Couldn't create directory at " << savesDirPath << Qt::endl;
+            qWarning() << "ERROR: Couldn't create directory at " << savesDirPath << Qt::endl;
             return;
         }
     }
@@ -173,24 +188,21 @@ void TimeTrackingApp::loadFrom(QDir savesDir)
     }
 }
 
-// private fn responsible for the loading and displaying of a project
-// not linked directly to an action
+// Private fn *responsible* for the loading of a project data + instantiate project widget
+// Not linked directly to an action
 void TimeTrackingApp::loadAt(const QString filepath, bool trackingCheckEnabled)
 {
     // Check if project isn't already loaded
     if (trackingCheckEnabled && isProjectAlreadyTracked(filepath)) {
-        qDebug() << "Can't load project: " << filepath << " is already loaded";
+        qWarning() << "ERROR! Can't load project: " << filepath << " is already loaded";
         return;
     }
 
-    ProjectData* loadedProject = new ProjectData("Unnamed Loaded Project");
+    ProjectData* loadedProject = new ProjectData("Unnamed Loaded Project", filepath);
     bool loadedSuccessfully = loadedProject->loadFromFile(filepath);
     if (loadedSuccessfully)
     {
-        connect(loadedProject, &ProjectData::newOpenedFile, this, &TimeTrackingApp::addToOpenedFiles);
-        connect(loadedProject, &ProjectData::deletedFile, this, &TimeTrackingApp::untrackProject);
-        projects.push_back(loadedProject);
-        newProjectWidget(loadedProject);
+        useProject(loadedProject);
     }
     else
     {
@@ -205,14 +217,14 @@ void TimeTrackingApp::loadAllOpenedProjects()
     QFile file(Epochpp::CFG_FILE_PATH);
 
     if (!file.open(QIODevice::ReadWrite)) {
-        qDebug() << "Failed to open config file in RW mode";
+        qWarning() << "ERROR! Couldn't load projects from config file: failed to open config file in RW mode";
         return;
     }
 
     QByteArray jsonData = file.readAll();
     QJsonDocument doc = QJsonDocument::fromJson(jsonData);
     if (doc.isNull() || !doc.isObject()) {
-        qDebug() << "Config file is corrupted: can't parse";
+        qWarning() << "ERROR! Couldn't load projects from config file: can't parse JSON data";
         file.close();
         return;
     }
@@ -223,8 +235,9 @@ void TimeTrackingApp::loadAllOpenedProjects()
     // Check if "openedFiles" key exists and is an array, otherwise abort process and load all projects from the default directory
     if (!(obj.contains("openedFiles") && obj["openedFiles"].isArray()))
     {
-        qDebug() << "Couldn't load projects from config file! Loading projects from default save location...";
-        loadProjectsFromDefaultDirectory();
+        qWarning() << "ERROR! Couldn't load projects from config file: can't parse JSON data";
+        file.close();
+        return;
     }
 
     openedFilesArray = obj["openedFiles"].toArray();
@@ -238,8 +251,7 @@ void TimeTrackingApp::loadAllOpenedProjects()
     file.close();
 }
 
-// [! ONLY USED IN CASE THE LOADING MECHANISM DOESNT WORK !]
-// THE FUNCTION ABOVE IS NOW RESPONSIBLE FOR LOADING ALL PROJECTS FOUND IN THE CONFIG FILE
+// LECAGY
 // private fn for loading and displaying projects located in the default directory where .timesheet are saved
 // not linked to an action
 void TimeTrackingApp::loadProjectsFromDefaultDirectory()
@@ -265,7 +277,7 @@ void TimeTrackingApp::loadAllProjectsFrom()
 
     if (inputPath.isEmpty())
     {
-        qDebug() << "Can't load projects from " << inputPath;
+        qWarning() << "Can't load projects from " << inputPath;
         return;
     }
 
@@ -279,11 +291,11 @@ void TimeTrackingApp::loadSingleProject()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
         tr("Load Project"), "",
-        tr("TIMESHEET (*.timesheet, *.TIMESHEET)"));
+        tr("timesheet (*.timesheet, *.TIMESHEET)"));
 
     if (fileName.isEmpty())
     {
-        qDebug() << "Can't load project at " << fileName;
+        qWarning() << "Can't load project at " << fileName;
         return;
     }
 
@@ -311,13 +323,23 @@ void TimeTrackingApp::askNewProject()
     }
 }
 
+// Create a new project from a project name
 void TimeTrackingApp::createProject(const QString &newProjectName)
 {
-    ProjectData* newProject = new ProjectData(newProjectName);
-    connect(newProject, &ProjectData::newOpenedFile, this, &TimeTrackingApp::addToOpenedFiles);
-    projects.push_back(newProject);
+    QString newProjectFilepath = QString(QDir::currentPath() + Epochpp::DEF_SAVE_LOCATION + newProjectName + "." + Epochpp::DEF_BIN_FILE_EXTENSION);
+    ProjectData* newProject = new ProjectData(newProjectName, newProjectFilepath);
+    useProject(newProject);
     newProject->saveToFile();
-    newProjectWidget(newProject);
+}
+
+// Track and set up project from ProjectData
+void TimeTrackingApp::useProject(ProjectData* projectData)
+{
+    projectData->connect(projectData, &ProjectData::signalTrackFile, this, &TimeTrackingApp::trackProject);
+    projectData->connect(projectData, &ProjectData::signalDeletedFile, this, &TimeTrackingApp::untrackProject);
+    projects.push_back(projectData);
+    trackProject(projectData->getFilepath());
+    newProjectWidget(projectData);
 }
 
 bool TimeTrackingApp::isProjectNameUnique(QString& testProjectName)
@@ -389,7 +411,7 @@ void TimeTrackingApp::newProjectWidget(ProjectData* project)
 void TimeTrackingApp::deleteProject(int projectID)
 {
     auto widgetIt = std::find_if(projectsVm.begin(), projectsVm.end(), [projectID](ProjectWidget* widget) {
-        return widget->project->ID == projectID;
+        return widget->project->m_ID == projectID;
     });
     if (widgetIt != projectsVm.end()) {
         ProjectWidget* widget = *widgetIt;
@@ -407,7 +429,7 @@ void TimeTrackingApp::deleteProject(int projectID)
     }
 
     auto it = std::find_if(projects.begin(), projects.end(), [projectID](ProjectData* project) {
-        return project->ID == projectID;
+        return project->m_ID == projectID;
     });
     if (it != projects.end()) {
         (*it)->deleteSaveFile();
@@ -422,20 +444,20 @@ void TimeTrackingApp::untrackProject(const QString& filepath)
     QFile file(Epochpp::CFG_FILE_PATH);
 
     if (!file.open(QIODevice::ReadWrite)) {
-        qDebug() << "Failed to open config file in RW mode";
+        qWarning() << "ERROR! Tried ro untrack project but couldn't open config file in RW mode";
         return;
     }
 
     QByteArray jsonData = file.readAll();
     QJsonDocument doc = QJsonDocument::fromJson(jsonData);
     if (doc.isNull() || !doc.isObject()) {
-        qDebug() << "Config file is corrupted: can't parse";
+        qWarning() << "ERROR! Tried ro untrack project but couldn't parse JSON data";
         file.close();
         return;
     }
 
     QJsonObject obj = doc.object();
-    QJsonArray openedFilesArray;
+    QJsonArray openedFilesArray = obj["openedFiles"].toArray();
 
     QJsonArray newOpenedFilesArray;
     bool found = false;
@@ -446,11 +468,12 @@ void TimeTrackingApp::untrackProject(const QString& filepath)
         }
         else {
             found = true;
+            qDebug() << "Found filepath of untracked project in the config file. Deleting it...";
         }
     }
 
     if (!found) {
-        qDebug() << "File path not found in the tracking list:" << filepath;
+        qWarning() << "File path not found in the tracking list:" << filepath;
         file.close();
         return;
     }
@@ -463,6 +486,7 @@ void TimeTrackingApp::untrackProject(const QString& filepath)
     QJsonDocument newDoc(obj);
     file.write(newDoc.toJson());
     file.close();
+    qDebug() << filepath << " no longer tracked";
 }
 
 /*
@@ -487,7 +511,7 @@ void TimeTrackingApp::configureStyleSheet()
     QFile styleSheetFile(":/qss/default-style.qss");
     if (!styleSheetFile.open(QFile::ReadOnly))
     {
-        qDebug() << "Couldn't open QSS file" <<  Qt::endl;
+        qWarning() << "Couldn't open QSS file" <<  Qt::endl;
         return;
     }
 

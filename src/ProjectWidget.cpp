@@ -128,7 +128,7 @@ void ProjectWidget::askDelete()
 
 void ProjectWidget::immediateDelete()
 {
-    emit requestProjectDeletion(project->ID);
+    emit requestProjectDeletion(project->m_ID);
     //bool deletionSuccessful = ...;
     //if(deletionSuccessful)
     // ... REMOVE WIDGET
