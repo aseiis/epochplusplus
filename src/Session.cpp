@@ -54,13 +54,16 @@ const int& Session::getID() const
 	return m_ID;
 }
 
-void Session::serialize(QDataStream& out) const {
-	out << m_startTime;
-	out << m_endTime;
+QJsonObject Session::serialize() const {
+	QJsonObject sessionJson;
+	sessionJson.insert("id", m_ID);
+	sessionJson.insert("start_time", m_startTime.toString(Epochpp::serialDateFormat));
+	sessionJson.insert("end_time", m_endTime.toString(Epochpp::serialDateFormat));
+	return sessionJson;
 }
 
-void Session::deserialize(QDataStream& in) {
-	qint64 duration;
-	in >> m_startTime;
-	in >> m_endTime;
+void Session::deserialize(QJsonObject& jsonObj) {
+
+	m_startTime = QDateTime::fromString(jsonObj.value("start_time").toString(), Epochpp::serialDateFormat);
+	m_endTime = QDateTime::fromString(jsonObj.value("end_time").toString(), Epochpp::serialDateFormat);
 }

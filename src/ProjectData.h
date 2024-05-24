@@ -8,6 +8,9 @@
 #include <QDataStream>
 #include <QDebug>
 #include <QRandomGenerator>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonDocument>
 #include "Session.h"
 #include "utils.h"
 

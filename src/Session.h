@@ -2,6 +2,8 @@
 
 #include <QDateTime>
 #include <QDebug>
+#include <QJsonObject>
+#include "utils.h"
 
 class Session
 {
@@ -16,8 +18,8 @@ public:
     quint64 getDuration() const; // Calculate the duration of the session in seconds
     const QDateTime& getStartDateTime() const;
     const int& getID() const;
-    void serialize(QDataStream& out) const;
-    void deserialize(QDataStream& in);
+    QJsonObject serialize() const;
+    void deserialize(QJsonObject& jsonObj);
 
 // ATTRIBUTES //
 

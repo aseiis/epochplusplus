@@ -13,6 +13,9 @@ namespace Epochpp {
 
     inline const char* CFG_FILE_PATH = "epochpp.cfg";
 
+    // SETTINGS //
+    inline Qt::DateFormat serialDateFormat = Qt::DateFormat::ISODate;
+
     // GLOBAL ACCESS //
 
     inline QMainWindow* g_mainWindow = nullptr;

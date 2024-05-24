@@ -166,22 +166,26 @@ bool ProjectData::saveToFile()
 
     qDebug() << "Saving to file " << verifiedFilepath;
 
-    QDataStream out(&file);
-    out.setVersion(QDataStream::Qt_DefaultCompiledVersion);
-
-    out << m_projectName;
-
-    out << m_projectColorQSS;
-
-    out << quint32(m_sessions.count());
+    QJsonObject mainObject;
+    mainObject.insert("project_name", m_projectName);
+    mainObject.insert("project_color_qss", m_projectColorQSS);
+    mainObject.insert("sessions_count", m_sessions.count());
 
     qDebug() << "Serializing " << quint32(m_sessions.count()) << " sessions...";
 
+    QJsonArray sessionsJsonArray;
     for (const Session& session : m_sessions)
     {
+        sessionsJsonArray.append(session.serialize());
         qDebug() << "Session " << session.getID() << " saved";
-        session.serialize(out);
     }
+
+    mainObject.insert("sessions", sessionsJsonArray);
+
+    QJsonDocument jsonDoc(mainObject);
+    file.resize(0);
+    file.write(jsonDoc.toJson(QJsonDocument::JsonFormat::Indented));
+    file.close();
 
     return true;
 }
@@ -213,17 +217,14 @@ bool ProjectData::loadFromFile(const QString& filepath)
         return false;
     }
 
-    QDataStream in(&file);
-    in.setVersion(QDataStream::Qt_DefaultCompiledVersion);
+    QString jsonTxt = file.readAll();
+    QJsonObject jsonObj = QJsonDocument::fromJson(jsonTxt.toUtf8()).object();
 
-    in >> m_projectName;
+    m_projectName = jsonObj.value("project_name").toString();
+    m_projectColorQSS = jsonObj.value("project_color_qss").toString();
 
-    in >> m_projectColorQSS;
+    int sessionsCount = jsonObj.value("sessions_count").toInt();
 
-    quint32 sessionCount;
-    in >> sessionCount;
-
-    // wip?
     if (m_currentSessionID != 0) {
         qDebug() << "Clearing sessions...";
         m_sessions.clear();
@@ -231,11 +232,16 @@ bool ProjectData::loadFromFile(const QString& filepath)
         m_currentSessionID = 0;
     }
 
-    // Session increment itself the int we're giving in order to keep track of the Session ID in a signel place
-    while (m_currentSessionID < sessionCount) {
-        Session session(m_currentSessionID);
-        session.deserialize(in);
-        m_sessions.append(session);
+    QJsonArray sessionsArray = jsonObj.value("sessions").toArray();
+    for (const QJsonValue& sessionJsonVal : sessionsArray)
+    {
+        QJsonObject sessionJsonObj = sessionJsonVal.toObject();
+        if (!sessionJsonObj.isEmpty()) 
+        {
+            Session session(m_currentSessionID);
+            session.deserialize(sessionJsonObj);
+            m_sessions.append(session);
+        }
     }
 
     return true;
